@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mighty Thorn Pass — Password &amp; Wallet Vault</title>
+<meta name="description" content="Mighty Thorn Pass by OmniCore Works: passwords, cards and licenses with photos, an extra-secure vault, and a built-in authenticator. Encrypted on your device — zero-knowledge, local-only.">
+<style>
+  :root{
+    --navy:#0a1128; --navy2:#0f1c3f; --navy3:#16295c; --card:#111e42; --card2:#0d1836;
+    --gold:#d4af37; --gold2:#f0c94a; --text:#eef1f8; --muted:#a9b4d0;
+    --line:#26356b; --danger:#e5534b; --ok:#3fb950; --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,var(--navy) 0%,var(--navy2) 60%,var(--navy) 100%);
+    color:var(--text); min-height:100vh; line-height:1.5;}
+  .wrap{max-width:720px; margin:0 auto; padding:18px 14px 48px;}
+  header.top{text-align:center; padding:18px 6px 4px;}
+  header.top .thorn{font-size:38px;}
+  header.top h1{font-size:27px; margin-top:6px;}
+  header.top h1 .gold{color:var(--gold);}
+  header.top p{color:var(--muted); font-size:14.5px; margin-top:4px;}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 18px; margin-top:16px;}
+  .panel h2{font-size:20px; margin-bottom:10px;}
+  .panel h3{font-size:16px; margin:14px 0 8px;}
+  label{display:block; font-size:13.5px; color:var(--muted); margin:12px 0 5px; font-weight:600;}
+  input[type=text],input[type=password],input[type=url],input[type=number],input[type=month],select,textarea{
+    width:100%; background:var(--card2); border:1px solid var(--line); color:var(--text);
+    border-radius:10px; padding:12px; font-size:16px; outline:none;}
+  input:focus,select:focus,textarea:focus{border-color:var(--gold);}
+  textarea{min-height:74px; resize:vertical;}
+  .btn{display:inline-block; background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#1a1400;
+    font-weight:700; border:none; cursor:pointer; padding:13px 20px; border-radius:12px; font-size:16px; text-align:center; text-decoration:none;}
+  .btn.block{width:100%; margin-top:16px;}
+  .btn.secondary{background:var(--navy3); color:var(--text); border:1px solid var(--line);}
+  .btn.danger{background:#3a1220; color:#ff9d97; border:1px solid #6e2430;}
+  .btn.small{padding:9px 14px; font-size:14px; border-radius:10px;}
+  .btn:active{transform:scale(.99);}
+  .warn{background:#2a1a05; border:1px solid #7a5a12; color:#ffd97a; border-radius:10px; padding:12px 14px; font-size:14.5px; margin-top:12px;}
+  .hint{color:var(--muted); font-size:13.5px; margin-top:8px;}
+  .meter{height:8px; background:var(--card2); border-radius:99px; overflow:hidden; margin-top:8px; border:1px solid var(--line);}
+  .meter > div{height:100%; width:0%; background:var(--danger); transition:width .25s;}
+  .meter-label{font-size:13px; color:var(--muted); margin-top:5px;}
+  .toolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:16px;}
+  .toolbar .spacer{flex:1;}
+  .counts{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px;}
+  .count{background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:12px; text-align:center;}
+  .count b{display:block; font-size:22px; color:var(--gold2);}
+  .count span{font-size:12.5px; color:var(--muted);}
+  .tabs{display:flex; gap:8px; margin-top:18px;}
+  .tab{flex:1; padding:12px; text-align:center; border-radius:12px; border:1px solid var(--line);
+    background:var(--card2); color:var(--muted); font-weight:700; cursor:pointer; font-size:15px;}
+  .tab.active{background:var(--navy3); color:var(--text); border-color:var(--gold);}
+  .filters{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;}
+  .filters .full{grid-column:1/-1;}
+  .check{display:flex; align-items:center; gap:8px; font-size:14.5px; color:var(--text); margin-top:10px;}
+  .check input{width:20px; height:20px; accent-color:var(--gold);}
+  .item{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-top:12px;}
+  .item .head{display:flex; align-items:flex-start; gap:10px;}
+  .item .title{font-size:17px; font-weight:700; flex:1; word-break:break-word;}
+  .tag{font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:99px; background:#1d2c57; color:var(--gold2); border:1px solid var(--line); white-space:nowrap;}
+  .tag.extra{background:#33124a; color:#d9a7ff; border-color:#5b2a86;}
+  .fav{color:var(--gold2); font-size:18px; background:none; border:none; cursor:pointer; padding:0 2px;}
+  .row{display:flex; align-items:center; gap:8px; margin-top:9px; font-size:14.5px; flex-wrap:wrap;}
+  .row .k{color:var(--muted); min-width:86px; font-size:13px; font-weight:600;}
+  .row .v{flex:1; word-break:break-all; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14px;}
+  .icon-btn{background:var(--navy3); border:1px solid var(--line); color:var(--text); border-radius:9px; padding:7px 11px; font-size:13px; cursor:pointer; font-weight:600;}
+  .item .actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:13px;}
+  .totp-code{font-size:32px; letter-spacing:4px; font-weight:800; font-family:ui-monospace,Menlo,Consolas,monospace; color:var(--gold2);}
+  .countdown{height:6px; background:var(--card2); border:1px solid var(--line); border-radius:99px; overflow:hidden; margin-top:8px;}
+  .countdown > div{height:100%; background:var(--gold); width:100%;}
+  .photo{margin-top:10px;}
+  .photo img{max-width:100%; border-radius:10px; border:1px solid var(--line); display:block;}
+  .photo .cap{font-size:12.5px; color:var(--muted); margin-bottom:5px;}
+  .empty{color:var(--muted); text-align:center; padding:26px 10px; font-size:15px;}
+  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:22px; background:#1d2c57; color:var(--text);
+    border:1px solid var(--gold); padding:12px 18px; border-radius:12px; font-size:14.5px; z-index:60;
+    max-width:92vw; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,.5); display:none;}
+  .modal{position:fixed; inset:0; background:rgba(3,6,18,.78); z-index:50; display:none; overflow-y:auto; padding:16px 10px;}
+  .modal .box{max-width:640px; margin:10px auto; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 18px 24px;}
+  .gen-row{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
+  .gen-row .grow{flex:1; min-width:140px;}
+  video.qr{width:100%; border-radius:12px; border:1px solid var(--line); background:#000; margin-top:10px;}
+  .fill-banner{border:1px solid var(--gold); background:#241c04; border-radius:12px; padding:14px; margin-top:14px; display:none;}
+  .fill-banner b{color:var(--gold2);}
+  .hidden{display:none !important;}
+  footer{text-align:center; color:var(--muted); font-size:13px; padding:26px 8px 4px;}
+  @media (max-width:480px){ .counts{grid-template-columns:repeat(2,1fr);} .row .k{min-width:70px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="thorn" aria-hidden="true">🌹</div>
+    <h1>Mighty Thorn <span class="gold">Pass</span></h1>
+    <p>Passwords, cards &amp; licenses — encrypted on this device only.</p>
+  </header>
+
+  <!-- ============ SETUP ============ -->
+  <section id="view-setup" class="panel hidden">
+    <h2>Create your vault</h2>
+    <p class="hint">Choose a master password. It encrypts everything on this device — it is never sent anywhere and there is no server.</p>
+    <label for="setup-pw">Master password</label>
+    <input type="password" id="setup-pw" autocomplete="new-password" placeholder="Master password">
+    <div class="meter"><div id="setup-meter-bar"></div></div>
+    <div class="meter-label" id="setup-meter-label">Strength: —</div>
+    <label for="setup-pw2">Confirm master password</label>
+    <input type="password" id="setup-pw2" autocomplete="new-password" placeholder="Type it again">
+    <div class="warn">⚠️ <b>Important:</b> If you forget your master password, your vault <b>cannot be recovered</b> — that is by design, so nobody else can get in either. Pick one you will remember, and keep an encrypted backup export somewhere safe.</div>
+    <button class="btn block" id="btn-create-vault">Create vault</button>
+  </section>
+
+  <!-- ============ UNLOCK ============ -->
+  <section id="view-unlock" class="panel hidden">
+    <h2>Unlock your vault</h2>
+    <label for="unlock-pw">Master password</label>
+    <input type="password" id="unlock-pw" autocomplete="current-password" placeholder="Master password">
+    <button class="btn block" id="btn-unlock">Unlock</button>
+    <p class="hint" id="unlock-error" style="color:#ff9d97;"></p>
+    <p class="hint">Your vault lives only in this browser, encrypted. Nothing is sent anywhere.</p>
+  </section>
+
+  <!-- ============ APP ============ -->
+  <div id="view-app" class="hidden">
+    <div class="toolbar">
+      <span class="tag" id="lock-state">🔓 Vault open</span>
+      <span class="spacer"></span>
+      <button class="btn small secondary" id="btn-export">⬇ Export backup</button>
+      <button class="btn small secondary" id="btn-import">⬆ Import</button>
+      <input type="file" id="import-file" accept="application/json" class="hidden">
+      <button class="btn small danger" id="btn-lock">🔒 Lock now</button>
+    </div>
+
+    <div class="fill-banner" id="fill-banner">
+      <div id="fill-text"></div>
+      <div class="toolbar">
+        <button class="btn small" id="btn-fill-copy-pw">Step 2: Copy password</button>
+        <button class="btn small secondary" id="btn-fill-done">Done</button>
+      </div>
+    </div>
+
+    <section class="panel">
+      <h2>Dashboard</h2>
+      <div class="counts" id="counts"></div>
+      <p class="hint">The export is your backup: it contains <b>only encrypted data</b> (ciphertext) — never your plain passwords. Keep the backup file somewhere safe; you will need the same master password to use it.</p>
+    </section>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-main">Main vault</button>
+      <button class="tab" id="tab-extra">🔐 Extra-secure vault</button>
+    </div>
+
+    <section id="extra-locked" class="panel hidden">
+      <h2>🔐 Extra-secure vault</h2>
+      <p class="hint" id="extra-locked-text">This section has its own second password, on top of your master password. It locks again after 2 minutes, or as soon as you leave this section.</p>
+      <div id="extra-setup-fields" class="hidden">
+        <label for="extra-new">Create the extra-secure password (different from your master password)</label>
+        <input type="password" id="extra-new" autocomplete="new-password" placeholder="Extra-secure password">
+        <div class="meter"><div id="extra-meter-bar"></div></div>
+        <div class="meter-label" id="extra-meter-label">Strength: —</div>
+        <label for="extra-new2">Confirm extra-secure password</label>
+        <input type="password" id="extra-new2" autocomplete="new-password" placeholder="Type it again">
+        <div class="warn">⚠️ Same rule: if you forget this password, the extra-secure vault <b>cannot be recovered</b>, by design.</div>
+        <button class="btn block" id="btn-extra-create">Create extra-secure vault</button>
+      </div>
+      <div id="extra-unlock-fields" class="hidden">
+        <label for="extra-pw">Extra-secure password</label>
+        <input type="password" id="extra-pw" autocomplete="current-password" placeholder="Extra-secure password">
+        <button class="btn block" id="btn-extra-unlock">Unlock extra-secure vault</button>
+        <p class="hint" id="extra-error" style="color:#ff9d97;"></p>
+      </div>
+    </section>
+
+    <div id="vault-area">
+      <div class="toolbar">
+        <button class="btn" id="btn-add">＋ Add item</button>
+        <span class="spacer"></span>
+        <button class="btn small secondary hidden" id="btn-extra-lock">Lock extra-secure</button>
+      </div>
+      <div class="filters">
+        <input type="text" id="f-search" class="full" placeholder="🔎 Search your vault…">
+        <select id="f-type">
+          <option value="">All types</option>
+          <option value="login">Logins</option>
+          <option value="card">Cards</option>
+          <option value="id">IDs &amp; licenses</option>
+          <option value="note">Secure notes</option>
+          <option value="authenticator">Authenticators</option>
+        </select>
+        <select id="f-category"><option value="">All categories</option></select>
+      </div>
+      <label class="check"><input type="checkbox" id="f-fav"> Show favorites only</label>
+      <div id="item-list"></div>
+    </div>
+
+    <section class="panel">
+      <h2>About auto-fill</h2>
+      <p class="hint" style="font-size:14.5px;">This web version uses <b>tap-to-copy quick fill</b>: tap <b>Open &amp; Fill</b> on a login and it opens the site, copies your username, then your password — and wipes the clipboard after 30 seconds. No web page can type passwords into other apps or browsers; that is a rule of phones and browsers, which is why the big password apps do it through a phone app. <b>Full automatic save &amp; fill inside other apps and your browser comes with the Mighty Thorn Pass phone app</b>, which is the next step.</p>
+    </section>
+  </div>
+
+  <footer>© 2026 OmniCore Works · Mighty Thorn Pass — zero-knowledge, local-only encryption.</footer>
+</div>
+
+<!-- ============ ADD / EDIT MODAL ============ -->
+<div class="modal" id="modal-form">
+  <div class="box">
+    <h2 id="form-title">Add item</h2>
+    <label for="fld-type">Type</label>
+    <select id="fld-type">
+      <option value="login">Login</option>
+      <option value="card">Card</option>
+      <option value="id">ID / License</option>
+      <option value="note">Secure note</option>
+      <option value="authenticator">Authenticator</option>
+    </select>
+    <label for="fld-vault">Save in</label>
+    <select id="fld-vault">
+      <option value="main">Main vault</option>
+      <option value="extra">🔐 Extra-secure vault</option>
+    </select>
+    <div id="form-fields"></div>
+    <div class="toolbar">
+      <button class="btn" id="btn-form-save">Save</button>
+      <button class="btn secondary" id="btn-form-cancel">Cancel</button>
+      <span class="spacer"></span>
+      <button class="btn danger hidden" id="btn-form-delete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ QR MODAL ============ -->
+<div class="modal" id="modal-qr">
+  <div class="box">
+    <h2>Scan authenticator QR code</h2>
+    <p class="hint">Point the camera at the setup QR code from the site or app. Nothing is sent anywhere — scanning happens on this device.</p>
+    <video id="qr-video" class="qr" playsinline muted></video>
+    <p class="hint" id="qr-status">Starting camera…</p>
+    <div class="toolbar">
+      <button class="btn secondary" id="btn-qr-close">Cancel — enter the key by hand instead</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+"use strict";
+/* =====================================================================
+   Mighty Thorn Pass — zero-knowledge, local-only vault.
+   - Vault stored ONLY as ciphertext in localStorage.
+   - Keys derived with PBKDF2 (SHA-256, 210,000 iterations), AES-GCM 256.
+   - Nothing is sent anywhere. There is no server.
+   ===================================================================== */
+const LS_MAIN = "mtp.vault.main.v1";
+const LS_EXTRA = "mtp.vault.extra.v1";
+const PBKDF2_ITERATIONS = 210000; /* >= 200,000 per spec */
+const MAIN_IDLE_MS = 5 * 60 * 1000;
+const EXTRA_IDLE_MS = 2 * 60 * 1000;
+
+const $ = (id) => document.getElementById(id);
+const enc = new TextEncoder(), dec = new TextDecoder();
+
+/* ---------- base64 helpers ---------- */
+function b64encode(buf){ const b = new Uint8Array(buf); let s=""; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
+function b64decode(str){ const s = atob(str); const b = new Uint8Array(s.length); for(let i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return b; }
+function uid(){ const a = new Uint8Array(12); crypto.getRandomValues(a); return Array.from(a, x=>x.toString(16).padStart(2,"0")).join(""); }
+
+/* ---------- crypto core ---------- */
+async function deriveKey(password, saltBytes){
+  const base = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name:"PBKDF2", salt: saltBytes, iterations: PBKDF2_ITERATIONS, hash:"SHA-256" },
+    base,
+    { name:"AES-GCM", length:256 },
+    false, ["encrypt","decrypt"]
+  );
+}
+async function encryptPayload(password, payloadObj){
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(password, salt);
+  const ct = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, key, enc.encode(JSON.stringify(payloadObj)));
+  return { v:1, kdf:"PBKDF2", hash:"SHA-256", iter: PBKDF2_ITERATIONS, alg:"AES-GCM",
+           salt: b64encode(salt), iv: b64encode(iv), data: b64encode(ct) };
+}
+async function decryptPayload(password, blob){
+  const key = await deriveKey(password, b64decode(blob.salt));
+  const pt = await crypto.subtle.decrypt({ name:"AES-GCM", iv: b64decode(blob.iv) }, key, b64decode(blob.data));
+  return JSON.parse(dec.decode(pt));
+}
+function loadBlob(which){ try{ const raw = localStorage.getItem(which==="main"?LS_MAIN:LS_EXTRA); return raw?JSON.parse(raw):null; }catch(e){ return null; } }
+function saveBlob(which, blob){ localStorage.setItem(which==="main"?LS_MAIN:LS_EXTRA, JSON.stringify(blob)); }
+
+/* ---------- app state (memory only; cleared on lock) ---------- */
+const S = {
+  masterPw: null,            // kept in memory only while unlocked, never stored
+  mainItems: null,           // decrypted array while unlocked, else null
+  extraPw: null,
+  extraItems: null,          // null = extra vault locked
+  extraExists: false,
+  currentTab: "main",
+  mainTimer: null, extraTimer: null,
+  editingId: null, editingVault: null,
+  pendingPhoto: {},          // {front: dataURL, back: dataURL, photo: dataURL} while editing
+  fillItem: null,
+  qrStream: null, qrTimer: null, qrTarget: null,
+  totpTimer: null
+};
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function toast(msg, ms){
+  const t = $("toast"); t.textContent = msg; t.style.display = "block";
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ t.style.display="none"; }, ms || 3200);
+}
+
+/* ---------- clipboard with 30s auto-clear ---------- */
+function copyWithClear(text, msg){
+  const done = ()=> toast((msg||"Copied") + " — clipboard clears in 30 seconds");
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=> fallbackCopy(text, done));
+  } else fallbackCopy(text, done);
+  setTimeout(()=>{ if (navigator.clipboard) navigator.clipboard.writeText("").catch(()=>{}); }, 30000);
+}
+function fallbackCopy(text, done){
+  const ta = document.createElement("textarea"); ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta); done();
+}
+
+/* ---------- password strength ---------- */
+function strengthScore(pw){
+  if(!pw) return 0;
+  let score = 0;
+  if(pw.length >= 8) score++;
+  if(pw.length >= 12) score++;
+  if(pw.length >= 16) score++;
+  if(/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+  if(/\d/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  return Math.min(score, 5); // 0..5
+}
+function paintMeter(inputId, barId, labelId){
+  const pw = $(inputId).value, s = strengthScore(pw);
+  const names = ["—","Very weak","Weak","Okay","Strong","Very strong"];
+  const colors = ["#e5534b","#e5534b","#d29922","#d4af37","#3fb950","#3fb950"];
+  $(barId).style.width = (s/5*100) + "%"; $(barId).style.background = colors[s];
+  $(labelId).textContent = "Strength: " + (pw ? names[s] : "—");
+}
+
+/* ---------- password generator ---------- */
+function generatePassword(len, opts){
+  let pool = "";
+  if(opts.lower) pool += "abcdefghijkmnopqrstuvwxyz";
+  if(opts.upper) pool += "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  if(opts.digits) pool += "23456789";
+  if(opts.symbols) pool += "!@#$%^&*()-_=+[]{}<>?";
+  if(!pool) pool = "abcdefghijkmnopqrstuvwxyz";
+  const arr = new Uint32Array(len); crypto.getRandomValues(arr);
+  let out = ""; for(let i=0;i<len;i++) out += pool[arr[i] % pool.length];
+  return out;
+}
+
+/* ---------- base32 + TOTP (RFC 6238, HMAC-SHA1) ---------- */
+const B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+function base32Decode(input){
+  const clean = String(input||"").toUpperCase().replace(/[\s=-]/g,"");
+  let bits = 0, value = 0; const out = [];
+  for(const ch of clean){
+    const idx = B32.indexOf(ch); if(idx === -1) continue;
+    value = (value << 5) | idx; bits += 5;
+    if(bits >= 8){ out.push((value >>> (bits - 8)) & 0xff); bits -= 8; }
+  }
+  return new Uint8Array(out);
+}
+async function totpCode(secret, dateMs){
+  const keyBytes = base32Decode(secret);
+  if(!keyBytes.length) return null;
+  const counter = Math.floor((dateMs || Date.now()) / 1000 / 30);
+  const msg = new ArrayBuffer(8); const view = new DataView(msg);
+  view.setUint32(0, Math.floor(counter / 4294967296)); view.setUint32(4, counter >>> 0);
+  const key = await crypto.subtle.importKey("raw", keyBytes, { name:"HMAC", hash:"SHA-1" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, msg));
+  const off = sig[sig.length - 1] & 0x0f;
+  const code = ((sig[off] & 0x7f) << 24) | ((sig[off+1] & 0xff) << 16) | ((sig[off+2] & 0xff) << 8) | (sig[off+3] & 0xff);
+  return String(code % 1000000).padStart(6, "0");
+}
+function parseOtpauth(url){
+  try{
+    const u = new URL(url);
+    if(u.protocol !== "otpauth:") return null;
+    const secret = u.searchParams.get("secret"); if(!secret) return null;
+    let label = decodeURIComponent(u.pathname.replace(/^\//,""));
+    let issuer = u.searchParams.get("issuer") || "";
+    let account = label;
+    if(label.includes(":")){ const parts = label.split(":"); if(!issuer) issuer = parts[0].trim(); account = parts.slice(1).join(":").trim(); }
+    return { issuer, account, secret };
+  }catch(e){ return null; }
+}
+
+/* ---------- photo compression (max 1024px, JPEG ~0.8) ---------- */
+function compressPhoto(file){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, 1024 / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL("image/jpeg", 0.8));
+    };
+    img.onerror = reject; img.src = url;
+  });
+}
+
+/* ---------- auto-lock timers ---------- */
+function resetMainTimer(){
+  clearTimeout(S.mainTimer);
+  if(S.mainItems) S.mainTimer = setTimeout(()=>{ lockAll(); toast("Vault locked after 5 minutes idle."); }, MAIN_IDLE_MS);
+}
+function resetExtraTimer(){
+  clearTimeout(S.extraTimer);
+  if(S.extraItems) S.extraTimer = setTimeout(()=>{ lockExtra(); toast("Extra-secure vault locked after 2 minutes."); renderAll(); }, EXTRA_IDLE_MS);
+}
+["click","keydown","touchstart","input"].forEach(ev =>
+  document.addEventListener(ev, ()=>{ resetMainTimer(); resetExtraTimer(); }, { passive:true }));
+
+/* ---------- lock / unlock ---------- */
+function lockExtra(){ S.extraItems = null; S.extraPw = null; clearTimeout(S.extraTimer); }
+function lockAll(){
+  S.mainItems = null; S.masterPw = null; lockExtra();
+  clearTimeout(S.mainTimer); stopTotpTicker(); stopQr();
+  $("view-app").classList.add("hidden");
+  showAuthView();
+}
+function showAuthView(){
+  const exists = !!loadBlob("main");
+  $("view-setup").classList.toggle("hidden", exists);
+  $("view-unlock").classList.toggle("hidden", !exists);
+  if(exists) setTimeout(()=> $("unlock-pw").focus(), 50);
+}
+async function persistMain(){
+  const blob = await encryptPayload(S.masterPw, { items: S.mainItems });
+  saveBlob("main", blob);
+}
+async function persistExtra(){
+  if(!S.extraItems || !S.extraPw) return;
+  const blob = await encryptPayload(S.extraPw, { items: S.extraItems });
+  saveBlob("extra", blob);
+}
+
+/* ---------- rendering ---------- */
+const TYPE_LABEL = { login:"Login", card:"Card", id:"ID / License", note:"Note", authenticator:"Authenticator" };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+function allItems(){
+  const out = [];
+  (S.mainItems||[]).forEach(it => out.push({ it, vault:"main" }));
+  (S.extraItems||[]).forEach(it => out.push({ it, vault:"extra" }));
+  return out;
+}
+function renderCounts(){
+  const counts = { login:0, card:0, id:0, note:0, authenticator:0 };
+  allItems().forEach(({it}) => { if(counts[it.type] !== undefined) counts[it.type]++; });
+  const extraCount = S.extraItems ? S.extraItems.length : null;
+  $("counts").innerHTML =
+    [["Logins",counts.login],["Cards",counts.card],["IDs",counts.id],["Notes",counts.note],["Authenticators",counts.authenticator],
+     ["🔐 Extra-secure", extraCount===null ? "Locked" : extraCount]]
+    .map(([label,n]) => `<div class="count"><b>${n}</b><span>${label}</span></div>`).join("");
+}
+function renderCategories(){
+  const cats = new Set();
+  allItems().forEach(({it}) => { if(it.category) cats.add(it.category); });
+  const sel = $("f-category"); const cur = sel.value;
+  sel.innerHTML = `<option value="">All categories</option>` + Array.from(cats).sort().map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  sel.value = cur;
+}
+function fieldRow(k, v, opts){
+  opts = opts || {};
+  if(v === undefined || v === null || v === "") return "";
+  const idAttr = opts.copy ? `data-copy="${esc(v)}"` : "";
+  const eye = opts.secret ? `<button class="icon-btn" data-eye="1">Show</button>` : "";
+  return `<div class="row"><span class="k">${esc(k)}</span><span class="v" ${opts.secret?'data-secret="'+esc(v)+'"':''}>${opts.secret?"••••••••":esc(v)}</span>${eye}${opts.copy?`<button class="icon-btn" ${idAttr}>Copy</button>`:""}</div>`;
+}
+function itemCard(it, vault){
+  const f = it.fields || {};
+  let body = "";
+  if(it.type === "login"){
+    body += fieldRow("Username", f.username, { copy:true });
+    body += fieldRow("Password", f.password, { secret:true, copy:true });
+    if(f.url) body += `<div class="row"><span class="k">Website</span><span class="v">${esc(f.url)}</span></div>`;
+    if(f.totpSecret) body += `<div class="totp-slot" data-totp="${esc(f.totpSecret)}" data-name="${esc(it.name)}"></div>`;
+  } else if(it.type === "card"){
+    body += fieldRow("Cardholder", f.cardholder);
+    body += fieldRow("Number", f.number, { secret:true, copy:true });
+    body += fieldRow("Expiry", f.expiry);
+    body += fieldRow("CVV", f.cvv, { secret:true, copy:true });
+    body += fieldRow("PIN", f.pin, { secret:true, copy:true });
+    body += fieldRow("Billing ZIP", f.zip);
+    if(it.photos && it.photos.photo) body += `<div class="photo"><div class="cap">Card photo</div><img alt="Card photo" src="${it.photos.photo}"></div>`;
+  } else if(it.type === "id"){
+    body += fieldRow("Type", f.idType);
+    body += fieldRow("Number", f.number, { secret:true, copy:true });
+    body += fieldRow("Expiry", f.expiry);
+    if(it.photos && it.photos.front) body += `<div class="photo"><div class="cap">Front</div><img alt="ID front" src="${it.photos.front}"></div>`;
+    if(it.photos && it.photos.back) body += `<div class="photo"><div class="cap">Back</div><img alt="ID back" src="${it.photos.back}"></div>`;
+  } else if(it.type === "note"){
+    if(f.text) body += `<div class="row"><span class="v" style="font-family:inherit; white-space:pre-wrap;">${esc(f.text)}</span></div>`;
+  } else if(it.type === "authenticator"){
+    body += fieldRow("Issuer", f.issuer);
+    body += fieldRow("Account", f.account);
+    body += `<div class="totp-slot" data-totp="${esc(f.secret||"")}" data-name="${esc(it.name)}"></div>`;
+  }
+  if(it.category) body += fieldRow("Category", it.category);
+  if(it.notes) body += `<div class="row"><span class="k">Notes</span><span class="v" style="font-family:inherit; white-space:pre-wrap;">${esc(it.notes)}</span></div>`;
+  const fillBtn = (it.type === "login") ? `<button class="icon-btn" data-act="fill">Open &amp; Fill</button>` : "";
+  return `<article class="item" data-id="${it.id}" data-vault="${vault}">
+    <div class="head">
+      <div class="title">${esc(it.name)}</div>
+      <span class="tag">${TYPE_LABEL[it.type]||it.type}</span>
+      ${vault==="extra" ? `<span class="tag extra">🔐 Extra</span>` : ""}
+      <button class="fav" data-act="fav" title="Favorite">${it.favorite ? "★" : "☆"}</button>
+    </div>
+    ${body}
+    <div class="actions">
+      ${fillBtn}
+      <button class="icon-btn" data-act="edit">Edit</button>
+      <button class="icon-btn" data-act="delete">Delete</button>
+    </div>
+  </article>`;
+}
+function renderList(){
+  const listEl = $("item-list");
+  const tab = S.currentTab;
+  if(tab === "extra" && !S.extraItems){
+    $("vault-area").classList.add("hidden");
+    $("extra-locked").classList.remove("hidden");
+    S.extraExists = !!loadBlob("extra");
+    $("extra-setup-fields").classList.toggle("hidden", S.extraExists);
+    $("extra-unlock-fields").classList.toggle("hidden", !S.extraExists);
+    return;
+  }
+  $("extra-locked").classList.add("hidden");
+  $("vault-area").classList.remove("hidden");
+  $("btn-extra-lock").classList.toggle("hidden", tab !== "extra");
+  const q = $("f-search").value.trim().toLowerCase();
+  const tf = $("f-type").value, cf = $("f-category").value, favOnly = $("f-fav").checked;
+  const source = tab === "extra" ? (S.extraItems||[]).map(it=>({it, vault:"extra"})) : (S.mainItems||[]).map(it=>({it, vault:"main"}));
+  const filtered = source.filter(({it})=>{
+    if(tf && it.type !== tf) return false;
+    if(cf && it.category !== cf) return false;
+    if(favOnly && !it.favorite) return false;
+    if(q){
+      const hay = (it.name + " " + (it.category||"") + " " + JSON.stringify(it.fields||{})).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  if(!filtered.length){
+    listEl.innerHTML = `<div class="empty">${source.length ? "No items match your search." : "Nothing here yet. Tap “＋ Add item” to add your first one."}</div>`;
+  } else {
+    listEl.innerHTML = filtered.map(({it, vault}) => itemCard(it, vault)).join("");
+  }
+  refreshTotpSlots();
+}
+function renderAll(){ renderCounts(); renderCategories(); renderList(); }
+
+/* ---------- TOTP live display ---------- */
+async function refreshTotpSlots(){
+  const slots = document.querySelectorAll(".totp-slot");
+  for(const slot of slots){
+    const secret = slot.getAttribute("data-totp");
+    if(!secret){ slot.innerHTML = ""; continue; }
+    const code = await totpCode(secret);
+    const remain = 30 - (Math.floor(Date.now()/1000) % 30);
+    slot.innerHTML = `<div class="row"><span class="k">2FA code</span><span class="totp-code">${code ? code.replace(/(\d{3})(\d{3})/,"$1 $2") : "———"}</span>
+      <button class="icon-btn" data-copy-code="${code||""}">Copy code</button></div>
+      <div class="countdown"><div style="width:${(remain/30*100).toFixed(1)}%"></div></div>
+      <div class="hint">New code in ${remain}s</div>`;
+  }
+}
+function startTotpTicker(){
+  stopTotpTicker();
+  S.totpTimer = setInterval(()=>{ if(S.mainItems) refreshTotpSlots(); }, 1000);
+}
+function stopTotpTicker(){ if(S.totpTimer){ clearInterval(S.totpTimer); S.totpTimer = null; } }
+
+/* ---------- list interactions (copy / show / fav / edit / delete / fill) ---------- */
+$("item-list").addEventListener("click", async (e)=>{
+  const card = e.target.closest(".item"); if(!card) return;
+  const id = card.getAttribute("data-id"), vault = card.getAttribute("data-vault");
+  const arr = vault === "extra" ? S.extraItems : S.mainItems;
+  const item = (arr||[]).find(x => x.id === id); if(!item) return;
+
+  const copyBtn = e.target.closest("[data-copy]");
+  if(copyBtn){ copyWithClear(copyBtn.getAttribute("data-copy"), "Copied"); return; }
+  const codeBtn = e.target.closest("[data-copy-code]");
+  if(codeBtn && codeBtn.getAttribute("data-copy-code")){ copyWithClear(codeBtn.getAttribute("data-copy-code"), "Code copied"); return; }
+  const eyeBtn = e.target.closest("[data-eye]");
+  if(eyeBtn){
+    const vEl = eyeBtn.parentElement.querySelector("[data-secret]");
+    const showing = eyeBtn.textContent === "Hide";
+    vEl.textContent = showing ? "••••••••" : vEl.getAttribute("data-secret");
+    eyeBtn.textContent = showing ? "Show" : "Hide";
+    return;
+  }
+  const actBtn = e.target.closest("[data-act]"); if(!actBtn) return;
+  const act = actBtn.getAttribute("data-act");
+  if(act === "fav"){
+    item.favorite = !item.favorite;
+    if(vault === "extra") await persistExtra(); else await persistMain();
+    renderAll();
+  } else if(act === "edit"){ openForm(item, vault); }
+  else if(act === "delete"){
+    if(!confirm("Delete “" + item.name + "”? This cannot be undone.")) return;
+    const idx = arr.findIndex(x => x.id === id); arr.splice(idx, 1);
+    if(vault === "extra") await persistExtra(); else await persistMain();
+    toast("Deleted."); renderAll();
+  } else if(act === "fill"){ openFill(item); }
+});
+
+/* ---------- Open & Fill ---------- */
+function openFill(item){
+  const f = item.fields || {};
+  if(f.url){
+    let url = f.url.trim();
+    if(!/^https?:\/\//i.test(url)) url = "https://" + url;
+    window.open(url, "_blank", "noopener");
+  }
+  if(f.username) copyWithClear(f.username, "Username copied — paste it on the site, then come back for the password");
+  S.fillItem = item;
+  $("fill-text").innerHTML = `<b>Open &amp; Fill:</b> ${esc(item.name)} — Step 1: paste the copied username on the site. Then tap Step 2 here.`;
+  $("fill-banner").style.display = "block";
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+$("btn-fill-copy-pw").addEventListener("click", ()=>{
+  if(S.fillItem && S.fillItem.fields && S.fillItem.fields.password)
+    copyWithClear(S.fillItem.fields.password, "Password copied — paste it to sign in");
+});
+$("btn-fill-done").addEventListener("click", ()=>{ $("fill-banner").style.display = "none"; S.fillItem = null; });
+
+/* ---------- add / edit form ---------- */
+function formField(label, id, opts){
+  opts = opts || {};
+  const type = opts.type || "text";
+  const val = esc(opts.value || "");
+  if(opts.textarea) return `<label for="${id}">${label}</label><textarea id="${id}" placeholder="${esc(opts.ph||"")}">${val}</textarea>`;
+  return `<label for="${id}">${label}</label><input type="${type}" id="${id}" value="${val}" placeholder="${esc(opts.ph||"")}" ${opts.autocomplete?`autocomplete="${opts.autocomplete}"`:""}>`;
+}
+function photoField(label, key, existing){
+  return `<label>${label}</label>
+    <input type="file" accept="image/*" data-photo="${key}">
+    <div class="hint" data-photo-state="${key}">${existing ? "Photo saved — choose a new file only to replace it." : "Take a photo or pick one. It is compressed and encrypted on this device."}</div>
+    ${existing ? `<div class="photo"><img alt="${esc(label)}" src="${existing}"></div>` : ""}`;
+}
+function buildFormFields(type, item){
+  const f = (item && item.fields) || {};
+  const ph = (item && item.photos) || {};
+  let h = "";
+  h += formField("Name", "fld-name", { value: f.__name || (item ? item.name : ""), ph:"e.g. Gmail, Chase Bank, Driver's License" });
+  if(type === "login"){
+    h += formField("Username / email", "fld-username", { value:f.username, autocomplete:"off" });
+    h += formField("Password", "fld-password", { value:f.password, type:"text", autocomplete:"off" });
+    h += `<div class="meter"><div id="fld-meter-bar"></div></div><div class="meter-label" id="fld-meter-label">Strength: —</div>`;
+    h += `<div class="panel" style="margin-top:12px; padding:14px;">
+      <h3 style="margin-top:0;">Password generator</h3>
+      <div class="gen-row">
+        <div class="grow"><label for="gen-len">Length: <span id="gen-len-val">16</span></label>
+        <input type="range" id="gen-len" min="8" max="40" value="16" style="width:100%;"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="gen-upper" checked> Uppercase (A-Z)</label>
+      <label class="check"><input type="checkbox" id="gen-lower" checked> Lowercase (a-z)</label>
+      <label class="check"><input type="checkbox" id="gen-digits" checked> Digits (0-9)</label>
+      <label class="check"><input type="checkbox" id="gen-symbols" checked> Symbols (!@#$…)</label>
+      <button class="btn small" id="btn-gen" type="button" style="margin-top:10px;">Generate &amp; use</button>
+    </div>`;
+    h += formField("Website URL", "fld-url", { value:f.url, type:"url", ph:"https://…" });
+    h += formField("Authenticator (2FA) secret — optional", "fld-totp", { value:f.totpSecret, ph:"Base32 setup key, spaces OK" });
+    h += `<div class="toolbar"><button class="btn small secondary" type="button" id="btn-scan-login">📷 Scan 2FA QR code</button></div>`;
+  } else if(type === "card"){
+    h += formField("Cardholder name", "fld-cardholder", { value:f.cardholder });
+    h += formField("Card number", "fld-number", { value:f.number, autocomplete:"off" });
+    h += formField("Expiry (MM/YY)", "fld-expiry", { value:f.expiry, ph:"MM/YY" });
+    h += formField("CVV", "fld-cvv", { value:f.cvv, autocomplete:"off" });
+    h += formField("PIN", "fld-pin", { value:f.pin, autocomplete:"off" });
+    h += formField("Billing ZIP", "fld-zip", { value:f.zip });
+    h += photoField("Card photo", "photo", ph.photo);
+  } else if(type === "id"){
+    h += `<label for="fld-idtype">ID type</label><select id="fld-idtype">
+      ${["Driver's license","State ID","Passport","Other ID"].map(t=>`<option ${f.idType===t?"selected":""}>${t}</option>`).join("")}</select>`;
+    h += formField("ID number", "fld-number", { value:f.number, autocomplete:"off" });
+    h += formField("Expiry", "fld-expiry", { value:f.expiry, ph:"YYYY-MM-DD or MM/YY" });
+    h += photoField("Front photo", "front", ph.front);
+    h += photoField("Back photo", "back", ph.back);
+  } else if(type === "note"){
+    h += formField("Note text", "fld-text", { value:f.text, textarea:true });
+  } else if(type === "authenticator"){
+    h += formField("Issuer (site or app)", "fld-issuer", { value:f.issuer, ph:"e.g. Google, GitHub" });
+    h += formField("Account name", "fld-account", { value:f.account });
+    h += formField("Secret key (base32)", "fld-secret", { value:f.secret, ph:"Setup key — spaces and lowercase are OK" });
+    h += `<div class="toolbar"><button class="btn small secondary" type="button" id="btn-scan-auth">📷 Scan QR code</button></div>
+    <p class="hint" id="scan-fallback">If scanning is unavailable, type the setup key above — manual entry always works.</p>`;
+  }
+  h += formField("Category", "fld-category", { value: item ? item.category : "", ph:"e.g. Banking, Social, Work" });
+  h += formField("Notes", "fld-notes", { value: item ? item.notes : "", textarea:true });
+  h += `<label class="check"><input type="checkbox" id="fld-fav" ${item && item.favorite ? "checked" : ""}> Favorite</label>`;
+  return h;
+}
+function wireFormExtras(type){
+  if(type === "login"){
+    const pw = $("fld-password");
+    if(pw){ pw.addEventListener("input", ()=> paintMeter("fld-password","fld-meter-bar","fld-meter-label")); paintMeter("fld-password","fld-meter-bar","fld-meter-label"); }
+    const len = $("gen-len");
+    if(len) len.addEventListener("input", ()=> $("gen-len-val").textContent = len.value);
+    const gen = $("btn-gen");
+    if(gen) gen.addEventListener("click", ()=>{
+      pw.value = generatePassword(parseInt($("gen-len").value,10), {
+        upper:$("gen-upper").checked, lower:$("gen-lower").checked,
+        digits:$("gen-digits").checked, symbols:$("gen-symbols").checked });
+      paintMeter("fld-password","fld-meter-bar","fld-meter-label");
+      toast("New password generated.");
+    });
+    const scan = $("btn-scan-login");
+    if(scan) scan.addEventListener("click", ()=> startQr("login"));
+  }
+  if(type === "authenticator"){
+    const scan = $("btn-scan-auth");
+    if(scan) scan.addEventListener("click", ()=> startQr("authenticator"));
+  }
+  document.querySelectorAll("[data-photo]").forEach(input=>{
+    input.addEventListener("change", async ()=>{
+      const file = input.files && input.files[0]; if(!file) return;
+      const key = input.getAttribute("data-photo");
+      try{
+        S.pendingPhoto[key] = await compressPhoto(file);
+        const st = document.querySelector(`[data-photo-state="${key}"]`);
+        if(st) st.textContent = "Photo ready — it will be encrypted when you save.";
+      }catch(e){ toast("Could not read that photo."); }
+    });
+  });
+}
+function openForm(item, vault){
+  S.editingId = item ? item.id : null;
+  S.editingVault = item ? vault : null;
+  S.pendingPhoto = {};
+  const type = item ? item.type : "login";
+  $("form-title").textContent = item ? "Edit item" : "Add item";
+  $("fld-type").value = type;
+  $("fld-type").disabled = !!item;
+  let defaultVault = vault || S.currentTab;
+  if(!item && (type === "id" || type === "authenticator")) defaultVault = "extra"; /* per spec: IDs & authenticators default to extra-secure */
+  $("fld-vault").value = defaultVault;
+  $("btn-form-delete").classList.toggle("hidden", !item);
+  $("form-fields").innerHTML = buildFormFields(type, item);
+  wireFormExtras(type);
+  $("modal-form").style.display = "block";
+}
+function closeForm(){ $("modal-form").style.display = "none"; S.editingId = null; S.editingVault = null; S.pendingPhoto = {}; }
+$("fld-type").addEventListener("change", ()=>{
+  const type = $("fld-type").value;
+  if(!S.editingId && (type === "id" || type === "authenticator")) $("fld-vault").value = "extra";
+  $("form-fields").innerHTML = buildFormFields(type, null);
+  wireFormExtras(type);
+});
+$("btn-add").addEventListener("click", ()=> openForm(null, null));
+$("btn-form-cancel").addEventListener("click", closeForm);
+$("btn-form-delete").addEventListener("click", async ()=>{
+  if(!S.editingId) return;
+  const vault = S.editingVault;
+  const arr = vault === "extra" ? S.extraItems : S.mainItems;
+  const idx = (arr||[]).findIndex(x => x.id === S.editingId); if(idx < 0) return;
+  if(!confirm("Delete this item? This cannot be undone.")) return;
+  arr.splice(idx, 1);
+  if(vault === "extra") await persistExtra(); else await persistMain();
+  closeForm(); toast("Deleted."); renderAll();
+});
+$("btn-form-save").addEventListener("click", async ()=>{
+  const type = $("fld-type").value;
+  const targetVault = $("fld-vault").value;
+  const name = $("fld-name").value.trim();
+  if(!name){ toast("Give the item a name first."); return; }
+  if(targetVault === "extra" && !S.extraItems){
+    toast("Unlock or create the extra-secure vault first (open its tab), then save this item there.");
+    return;
+  }
+  const fields = {}; let photos = {};
+  if(S.editingId){
+    const srcArr = S.editingVault === "extra" ? S.extraItems : S.mainItems;
+    const src = (srcArr||[]).find(x => x.id === S.editingId);
+    if(src && src.type === type) photos = Object.assign({}, src.photos || {});
+  }
+  if(type === "login"){
+    fields.username = $("fld-username").value; fields.password = $("fld-password").value;
+    fields.url = $("fld-url").value.trim(); fields.totpSecret = $("fld-totp").value.trim();
+  } else if(type === "card"){
+    fields.cardholder = $("fld-cardholder").value; fields.number = $("fld-number").value;
+    fields.expiry = $("fld-expiry").value; fields.cvv = $("fld-cvv").value;
+    fields.pin = $("fld-pin").value; fields.zip = $("fld-zip").value;
+    if(S.pendingPhoto.photo) photos.photo = S.pendingPhoto.photo;
+  } else if(type === "id"){
+    fields.idType = $("fld-idtype").value; fields.number = $("fld-number").value; fields.expiry = $("fld-expiry").value;
+    if(S.pendingPhoto.front) photos.front = S.pendingPhoto.front;
+    if(S.pendingPhoto.back) photos.back = S.pendingPhoto.back;
+  } else if(type === "note"){
+    fields.text = $("fld-text").value;
+  } else if(type === "authenticator"){
+    fields.issuer = $("fld-issuer").value.trim(); fields.account = $("fld-account").value.trim();
+    fields.secret = $("fld-secret").value.trim();
+    if(!fields.secret){ toast("An authenticator needs its secret key."); return; }
+    if(!base32Decode(fields.secret).length){ toast("That secret key doesn't look like a valid base32 key."); return; }
+  }
+  const record = {
+    id: S.editingId || uid(), type, name,
+    category: $("fld-category").value.trim(), notes: $("fld-notes").value,
+    favorite: $("fld-fav").checked, fields, photos,
+    updated: Date.now()
+  };
+  if(S.editingId && S.editingVault !== targetVault){
+    const srcArr = S.editingVault === "extra" ? S.extraItems : S.mainItems;
+    const idx = srcArr.findIndex(x => x.id === S.editingId); if(idx >= 0) srcArr.splice(idx, 1);
+    if(S.editingVault === "extra") await persistExtra(); else await persistMain();
+  }
+  const destArr = targetVault === "extra" ? S.extraItems : S.mainItems;
+  const existingIdx = destArr.findIndex(x => x.id === record.id);
+  if(existingIdx >= 0) destArr[existingIdx] = record; else { record.created = Date.now(); destArr.push(record); }
+  if(targetVault === "extra") await persistExtra(); else await persistMain();
+  closeForm(); toast("Saved — encrypted on this device."); renderAll();
+});
+
+/* ---------- QR scanning (jsQR via CDN; manual entry always works) ---------- */
+async function startQr(target){
+  S.qrTarget = target;
+  if(typeof window.jsQR === "undefined"){
+    toast("QR scanning library didn't load — type the setup key by hand instead. Manual entry always works.");
+    return;
+  }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    toast("Camera isn't available here — type the setup key by hand instead.");
+    return;
+  }
+  try{
+    S.qrStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" } });
+  }catch(e){
+    toast("Camera permission wasn't given — type the setup key by hand instead.");
+    return;
+  }
+  $("modal-qr").style.display = "block";
+  const video = $("qr-video"); video.srcObject = S.qrStream; await video.play();
+  $("qr-status").textContent = "Camera on — point it at the QR code…";
+  const canvas = document.createElement("canvas"); const ctx = canvas.getContext("2d", { willReadFrequently:true });
+  const tick = ()=>{
+    if(!S.qrStream) return;
+    if(video.readyState === video.HAVE_ENOUGH_DATA){
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const found = window.jsQR(img.data, img.width, img.height);
+      if(found && found.data){
+        const parsed = parseOtpauth(found.data);
+        stopQr();
+        if(parsed){
+          if(S.qrTarget === "login"){ const el = $("fld-totp"); if(el) el.value = parsed.secret; }
+          else {
+            if($("fld-issuer")) $("fld-issuer").value = parsed.issuer || "";
+            if($("fld-account")) $("fld-account").value = parsed.account || "";
+            if($("fld-secret")) $("fld-secret").value = parsed.secret;
+            if($("fld-name") && !$("fld-name").value) $("fld-name").value = (parsed.issuer ? parsed.issuer + " — " : "") + (parsed.account || "Authenticator");
+          }
+          toast("QR scanned — secret filled in. Tap Save.");
+        } else toast("That QR code isn't an authenticator (otpauth) code.");
+        return;
+      }
+    }
+    S.qrTimer = requestAnimationFrame(tick);
+  };
+  tick();
+}
+function stopQr(){
+  if(S.qrTimer) cancelAnimationFrame(S.qrTimer); S.qrTimer = null;
+  if(S.qrStream){ S.qrStream.getTracks().forEach(t => t.stop()); S.qrStream = null; }
+  $("modal-qr").style.display = "none";
+}
+$("btn-qr-close").addEventListener("click", stopQr);
+
+/* ---------- setup & unlock ---------- */
+$("setup-pw").addEventListener("input", ()=> paintMeter("setup-pw","setup-meter-bar","setup-meter-label"));
+$("btn-create-vault").addEventListener("click", async ()=>{
+  const pw = $("setup-pw").value, pw2 = $("setup-pw2").value;
+  if(pw.length < 8){ toast("Use at least 8 characters for the master password."); return; }
+  if(pw !== pw2){ toast("The two passwords don't match."); return; }
+  S.masterPw = pw; S.mainItems = [];
+  await persistMain();
+  enterApp();
+  toast("Vault created. It's empty — add your first item.");
+});
+$("btn-unlock").addEventListener("click", async ()=>{
+  const pw = $("unlock-pw").value;
+  const blob = loadBlob("main"); if(!blob) return;
+  try{
+    const payload = await decryptPayload(pw, blob);
+    S.masterPw = pw; S.mainItems = payload.items || [];
+    $("unlock-pw").value = ""; $("unlock-error").textContent = "";
+    enterApp();
+  }catch(e){
+    $("unlock-error").textContent = "That password didn't open the vault. Try again.";
+  }
+});
+$("unlock-pw").addEventListener("keydown", (e)=>{ if(e.key === "Enter") $("btn-unlock").click(); });
+function enterApp(){
+  $("view-setup").classList.add("hidden");
+  $("view-unlock").classList.add("hidden");
+  $("view-app").classList.remove("hidden");
+  $("tab-main").click();
+  renderAll(); startTotpTicker(); resetMainTimer();
+}
+$("btn-lock").addEventListener("click", ()=>{ lockAll(); toast("Vault locked."); });
+
+/* ---------- extra-secure vault ---------- */
+$("extra-new").addEventListener("input", ()=> paintMeter("extra-new","extra-meter-bar","extra-meter-label"));
+$("btn-extra-create").addEventListener("click", async ()=>{
+  const pw = $("extra-new").value, pw2 = $("extra-new2").value;
+  if(pw.length < 8){ toast("Use at least 8 characters for the extra-secure password."); return; }
+  if(pw === S.masterPw){ toast("The extra-secure password must be different from your master password."); return; }
+  if(pw !== pw2){ toast("The two passwords don't match."); return; }
+  S.extraPw = pw; S.extraItems = [];
+  await persistExtra();
+  $("extra-new").value = ""; $("extra-new2").value = "";
+  resetExtraTimer(); renderAll();
+  toast("Extra-secure vault created and open.");
+});
+$("btn-extra-unlock").addEventListener("click", async ()=>{
+  const pw = $("extra-pw").value;
+  const blob = loadBlob("extra"); if(!blob) return;
+  try{
+    const payload = await decryptPayload(pw, blob);
+    S.extraPw = pw; S.extraItems = payload.items || [];
+    $("extra-pw").value = ""; $("extra-error").textContent = "";
+    resetExtraTimer(); renderAll();
+  }catch(e){
+    $("extra-error").textContent = "That password didn't open the extra-secure vault.";
+  }
+});
+$("extra-pw").addEventListener("keydown", (e)=>{ if(e.key === "Enter") $("btn-extra-unlock").click(); });
+$("btn-extra-lock").addEventListener("click", ()=>{ lockExtra(); renderAll(); toast("Extra-secure vault locked."); });
+
+/* ---------- tabs (leaving the extra section locks it) ---------- */
+$("tab-main").addEventListener("click", ()=>{
+  if(S.currentTab === "extra" && S.extraItems) lockExtra(); /* leaving locks the extra-secure vault */
+  S.currentTab = "main";
+  $("tab-main").classList.add("active"); $("tab-extra").classList.remove("active");
+  renderAll();
+});
+$("tab-extra").addEventListener("click", ()=>{
+  S.currentTab = "extra";
+  $("tab-extra").classList.add("active"); $("tab-main").classList.remove("active");
+  renderAll();
+});
+
+/* ---------- filters ---------- */
+["f-search","f-type","f-category","f-fav"].forEach(id => {
+  $(id).addEventListener("input", renderList);
+  $(id).addEventListener("change", renderList);
+});
+
+/* ---------- encrypted export / import (ciphertext only) ---------- */
+$("btn-export").addEventListener("click", ()=>{
+  const data = {
+    app: "Mighty Thorn Pass", kind: "encrypted-vault-backup", version: 1,
+    exportedAt: new Date().toISOString(),
+    note: "This backup contains ONLY encrypted data (ciphertext). It can only be opened with the same master password (and the same extra-secure password for that vault).",
+    main: loadBlob("main"), extra: loadBlob("extra")
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:"application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "mighty-thorn-pass-backup.json";
+  a.click();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 4000);
+  toast("Encrypted backup downloaded. Keep it somewhere safe.");
+});
+$("btn-import").addEventListener("click", ()=> $("import-file").click());
+$("import-file").addEventListener("change", async ()=>{
+  const file = $("import-file").files && $("import-file").files[0];
+  $("import-file").value = "";
+  if(!file) return;
+  try{
+    const parsed = JSON.parse(await file.text());
+    if(!parsed || !parsed.main || !parsed.main.data) throw new Error("bad file");
+    if(!confirm("Import this backup? It REPLACES the vault currently saved in this browser.")) return;
+    saveBlob("main", parsed.main);
+    if(parsed.extra) saveBlob("extra", parsed.extra); else localStorage.removeItem(LS_EXTRA);
+    lockAll();
+    toast("Backup imported. Unlock with the master password from that backup.");
+  }catch(e){
+    toast("That file doesn't look like a Mighty Thorn Pass backup.");
+  }
+});
+
+/* ---------- init ---------- */
+showAuthView();
+</script>
+</body>
+</html>
