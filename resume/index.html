@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HireReady — Resume & Cover Letter Builder | OmniCore Works</title>
+<meta name="description" content="Build a clean, professional resume and cover letter in minutes. Free templates, print or save as PDF. By OmniCore Works.">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1c2430; --muted: #5b6572; --accent: #7a1f2b; --accent2: #2563eb;
+    --bg: #eef1f5; --panel: #ffffff; --line: #d8dee6; --good: #177245;
+  }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--ink); }
+  header.topbar {
+    background: linear-gradient(135deg, #2b0f14, #7a1f2b); color: #fff;
+    padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+  }
+  header.topbar .brand { font-size: 20px; font-weight: 800; letter-spacing: .3px; }
+  header.topbar .brand small { display: block; font-size: 12px; font-weight: 500; opacity: .85; }
+  .topbar .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  button {
+    font: inherit; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink);
+    padding: 8px 14px; border-radius: 8px; font-weight: 600;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.blue { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  button.ghost { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.35); }
+  button.small { padding: 5px 10px; font-size: 13px; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .layout { display: flex; gap: 16px; padding: 16px; align-items: flex-start; max-width: 1440px; margin: 0 auto; }
+  .editor { flex: 1 1 430px; min-width: 300px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .preview-wrap { flex: 1 1 640px; min-width: 320px; position: sticky; top: 12px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .tabs button { flex: 1; }
+  .tabs button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  h3.sec { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 0 8px; }
+  h3.sec:first-of-type { margin-top: 4px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+  input[type=text], input[type=email], input[type=tel], textarea, select {
+    width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 14px; background: #fff;
+  }
+  textarea { min-height: 64px; resize: vertical; }
+  .row { display: flex; gap: 10px; } .row > div { flex: 1; }
+  .entry { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; background: #fbfcfe; }
+  .entry .entry-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .entry .entry-head b { font-size: 14px; }
+  .checkline { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; margin-top: 8px; }
+  .checkline input { width: auto; }
+  .templates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tpl { border: 2px solid var(--line); border-radius: 10px; padding: 10px 6px; text-align: center; font-size: 13px; font-weight: 700; cursor: pointer; background: #fff; position: relative; }
+  .tpl.active { border-color: var(--accent); background: #fdf2f3; }
+  .tpl .lock { display: block; font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px; }
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+  .probar { background: #fff7e6; border: 1px solid #f0d48a; border-radius: 10px; padding: 12px; margin-top: 16px; font-size: 14px; line-height: 1.5; }
+  .probar a { color: var(--accent); font-weight: 700; }
+  /* ---------- Resume page ---------- */
+  .page {
+    background: #fff; width: 100%; max-width: 816px; margin: 0 auto; padding: 48px 52px;
+    box-shadow: 0 4px 24px rgba(20,30,50,.12); color: #222; min-height: 1056px;
+  }
+  .page h1 { font-size: 30px; line-height: 1.15; }
+  .page h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em; margin: 20px 0 8px; padding-bottom: 4px; }
+  .page p, .page li { font-size: 14px; line-height: 1.5; }
+  .page .contact { font-size: 13px; color: #444; }
+  .page .job-head { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .page .job-head .t { font-weight: 700; font-size: 15px; }
+  .page .job-head .d { font-size: 13px; color: #555; white-space: nowrap; }
+  .page .job-sub { font-size: 13.5px; color: #444; margin-bottom: 4px; }
+  .page ul { margin: 4px 0 0 18px; }
+  /* classic */
+  .tpl-classic { font-family: Georgia, "Times New Roman", serif; }
+  .tpl-classic h1 { text-align: center; }
+  .tpl-classic .contact { text-align: center; }
+  .tpl-classic h2 { border-bottom: 1.5px solid #333; text-align: center; }
+  .tpl-classic .title-line { text-align: center; font-size: 15px; font-style: italic; color: #444; margin-top: 2px; }
+  /* modern */
+  .tpl-modern { font-family: "Segoe UI", Helvetica, Arial, sans-serif; }
+  .tpl-modern h1 { color: #2563eb; }
+  .tpl-modern .title-line { font-size: 15px; color: #2563eb; font-weight: 600; }
+  .tpl-modern h2 { color: #2563eb; border-bottom: 2px solid #2563eb; }
+  /* clean */
+  .tpl-clean { font-family: Helvetica, Arial, sans-serif; }
+  .tpl-clean h1 { font-weight: 300; font-size: 34px; }
+  .tpl-clean .title-line { color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: .15em; }
+  .tpl-clean h2 { color: #111; border-bottom: 1px solid #ccc; font-weight: 600; }
+  /* executive (pro) */
+  .tpl-executive { font-family: Georgia, serif; }
+  .tpl-executive .headband { background: #1c2430; color: #fff; margin: -48px -52px 20px; padding: 30px 52px 22px; }
+  .tpl-executive .headband .contact { color: #cfd6df; }
+  .tpl-executive .title-line { color: #d8b25c; font-size: 15px; }
+  .tpl-executive h2 { color: #1c2430; border-bottom: 2px solid #d8b25c; }
+  /* bold (pro) */
+  .tpl-bold { font-family: "Segoe UI", Helvetica, Arial, sans-serif; }
+  .tpl-bold h1 { color: #7a1f2b; font-size: 34px; }
+  .tpl-bold .title-line { font-weight: 700; font-size: 15px; }
+  .tpl-bold h2 { background: #7a1f2b; color: #fff; padding: 5px 10px; border-radius: 4px; }
+  /* fresh (pro) */
+  .tpl-fresh { font-family: Verdana, Geneva, sans-serif; }
+  .tpl-fresh h1 { color: #0f766e; }
+  .tpl-fresh .title-line { color: #0f766e; font-size: 15px; }
+  .tpl-fresh h2 { color: #0f766e; border-bottom: 2px dashed #0f766e; }
+  .letter p { margin-bottom: 12px; font-size: 14.5px; line-height: 1.6; }
+  .letter .addr { margin-bottom: 18px; }
+  dialog { border: none; border-radius: 14px; padding: 22px; max-width: 420px; width: calc(100% - 32px); box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  dialog::backdrop { background: rgba(15,20,30,.5); }
+  dialog h3 { margin-bottom: 8px; }
+  dialog p { font-size: 14px; line-height: 1.5; margin-bottom: 10px; }
+  .msg { font-size: 13px; margin-top: 8px; min-height: 18px; }
+  .msg.ok { color: var(--good); } .msg.err { color: #b3261e; }
+  footer.note { text-align: center; color: var(--muted); font-size: 12.5px; padding: 6px 16px 22px; line-height: 1.5; }
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; }
+    .preview-wrap { position: static; width: 100%; }
+    .page { padding: 28px 22px; min-height: 0; }
+    .tpl-executive .headband { margin: -28px -22px 16px; padding: 22px; }
+  }
+  @media print {
+    body { background: #fff; }
+    header.topbar, .editor, footer.note, .preview-wrap .hint { display: none !important; }
+    .layout { display: block; padding: 0; }
+    .preview-wrap { position: static; }
+    .page { box-shadow: none; max-width: none; width: 100%; min-height: 0; padding: 24px 8px; }
+    .tpl-executive .headband { margin: -24px -8px 18px; padding: 24px 8px 18px; }
+    @page { size: Letter; margin: 0.5in; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">HireReady<small>Resume &amp; Cover Letter Builder · by OmniCore Works</small></div>
+  <div class="actions">
+    <button class="ghost" id="btnSample" type="button">Load sample</button>
+    <button class="ghost" id="btnClear" type="button">Start over</button>
+    <button class="blue" id="btnUnlockTop" type="button">Unlock Pro</button>
+    <button class="primary" id="btnPrint" type="button">Print / Save PDF</button>
+  </div>
+</header>
+
+<div class="layout">
+  <section class="editor">
+    <div class="tabs">
+      <button type="button" id="tabResume" class="active">Resume</button>
+      <button type="button" id="tabLetter">Cover Letter</button>
+    </div>
+
+    <div id="paneResume">
+      <h3 class="sec">Template</h3>
+      <div class="templates" id="tplGrid"></div>
+      <p class="hint">Free: Classic, Modern, Clean. Pro adds Executive, Bold, and Fresh.</p>
+
+      <h3 class="sec">Your info</h3>
+      <label>Full name</label>
+      <input type="text" id="f_name" placeholder="Jordan Smith">
+      <label>Job title you're applying for</label>
+      <input type="text" id="f_title" placeholder="Customer Service Representative">
+      <div class="row">
+        <div><label>Email</label><input type="email" id="f_email" placeholder="you@email.com"></div>
+        <div><label>Phone</label><input type="tel" id="f_phone" placeholder="(555) 123-4567"></div>
+      </div>
+      <label>City, State</label>
+      <input type="text" id="f_loc" placeholder="Nashville, TN">
+      <label>Professional summary</label>
+      <textarea id="f_summary" placeholder="2–3 sentences: your experience, your strengths, and the kind of job you want."></textarea>
+
+      <h3 class="sec">Work experience</h3>
+      <div id="jobs"></div>
+      <button type="button" class="small" id="btnAddJob">+ Add a job</button>
+
+      <h3 class="sec">Education</h3>
+      <div id="edus"></div>
+      <button type="button" class="small" id="btnAddEdu">+ Add education</button>
+
+      <h3 class="sec">Skills</h3>
+      <label>Skills (separate with commas)</label>
+      <input type="text" id="f_skills" placeholder="Cash handling, Microsoft Word, Scheduling, Customer service">
+    </div>
+
+    <div id="paneLetter" style="display:none">
+      <h3 class="sec">The job you're applying to</h3>
+      <label>Company name</label>
+      <input type="text" id="l_company" placeholder="Acme Logistics">
+      <label>Job title</label>
+      <input type="text" id="l_job" placeholder="Warehouse Associate">
+      <label>Hiring manager's name (if you know it)</label>
+      <input type="text" id="l_manager" placeholder="Ms. Carter — or leave blank for 'Hiring Manager'">
+      <label>Where you saw the job (optional)</label>
+      <input type="text" id="l_source" placeholder="Indeed">
+      <h3 class="sec">Your letter</h3>
+      <label>Opening paragraph</label>
+      <textarea id="l_p1"></textarea>
+      <label>Middle paragraph — your experience</label>
+      <textarea id="l_p2"></textarea>
+      <label>Closing paragraph</label>
+      <textarea id="l_p3"></textarea>
+      <p class="hint">The letter uses the name, email, and phone from the Resume tab. Edit any paragraph — it updates live.</p>
+    </div>
+
+    <div class="probar" id="proBar">
+      <b>HireReady Pro — $14.99, one time.</b> Unlocks the Executive, Bold, and Fresh templates for both your resume and cover letter, forever.
+      <a href="https://btaylor204.gumroad.com/l/hireready" target="_blank" rel="noopener">Get Pro on Gumroad</a> — after checkout, tap “I have a code” and enter the code from your receipt email.
+      <div style="margin-top:8px"><button type="button" class="small" id="btnUnlock2">I have a code</button></div>
+    </div>
+  </section>
+
+  <section class="preview-wrap">
+    <div class="page" id="page"></div>
+    <p class="hint" style="max-width:816px;margin:10px auto 0">Your information never leaves your device — everything is saved only in this browser. Use Print / Save PDF and choose “Save as PDF” to download a copy.</p>
+  </section>
+</div>
+
+<footer class="note">HireReady by OmniCore Works · Free templates included · Pro is a one-time $14.99 — no subscription.</footer>
+
+<dialog id="dlgUnlock">
+  <h3>Unlock Pro</h3>
+  <p>Enter the code from your Gumroad receipt email. Pro unlocks the Executive, Bold, and Fresh templates on this device, forever.</p>
+  <input type="text" id="codeInput" placeholder="HR-XXXX-XXXX" autocomplete="off">
+  <div class="msg" id="codeMsg"></div>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button type="button" class="primary" id="btnApplyCode">Unlock</button>
+    <button type="button" id="btnCloseDlg">Close</button>
+  </div>
+  <p style="margin-top:12px">No code yet? <a href="https://btaylor204.gumroad.com/l/hireready" target="_blank" rel="noopener">Get Pro for $14.99 on Gumroad</a>.</p>
+</dialog>
+
+<script>
+"use strict";
+const PRO_HASHES = ["f32ba7be70a4af05","b37bf276f15171e6","41d946f52b322d40","fbc360edbf360760","f680d4d70c802eea","a7d7c5e7dbc8ae84","83ebaa0171b1ec19","12c1ebc65dfb95db","609eb2cc2e159607","eef476b876d0c98d","551e7ec020849f3b","2b198069a72f0cac","48fc8370e204aa96","101629106497dae8","d9a44e98233c99c0","2f1accbf2d8ebd13","4b5ba44d3760b4d3","48af744658eb6709","ab007ebf98e3c874","a01f5c1059b3d0e3"];
+const TEMPLATES = [
+  { id: "classic",   name: "Classic",   pro: false },
+  { id: "modern",    name: "Modern",    pro: false },
+  { id: "clean",     name: "Clean",     pro: false },
+  { id: "executive", name: "Executive", pro: true },
+  { id: "bold",      name: "Bold",      pro: true },
+  { id: "fresh",     name: "Fresh",     pro: true }
+];
+const LS_KEY = "hireready-v1", LS_PRO = "hireready-pro";
+let pro = localStorage.getItem(LS_PRO) === "1";
+let mode = "resume";
+let state = load() || blank();
+
+function blank() {
+  return {
+    template: "classic",
+    name: "", title: "", email: "", phone: "", loc: "", summary: "", skills: "",
+    jobs: [ { title: "", company: "", loc: "", start: "", end: "", current: false, bullets: "" } ],
+    edus: [ { school: "", degree: "", year: "" } ],
+    letter: { company: "", job: "", manager: "", source: "", p1: "", p2: "", p3: "" }
+  };
+}
+function load() { try { const s = JSON.parse(localStorage.getItem(LS_KEY)); return s && s.jobs ? s : null; } catch (e) { return null; } }
+function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+function esc(s) { return String(s || "").replace(/[&<>""]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+/* ---------- template grid ---------- */
+const tplGrid = document.getElementById("tplGrid");
+function renderTemplates() {
+  tplGrid.innerHTML = "";
+  TEMPLATES.forEach(t => {
+    const d = document.createElement("div");
+    d.className = "tpl" + (state.template === t.id ? " active" : "");
+    d.innerHTML = esc(t.name) + (t.pro && !pro ? '<span class="lock">PRO</span>' : "");
+    d.onclick = () => {
+      if (t.pro && !pro) { openUnlock(); return; }
+      state.template = t.id; save(); renderTemplates(); render();
+    };
+    tplGrid.appendChild(d);
+  });
+}
+
+/* ---------- form binding ---------- */
+function bindText(id, get, set) {
+  const el = document.getElementById(id);
+  el.value = get();
+  el.addEventListener("input", () => { set(el.value); save(); render(); });
+}
+function bindAll() {
+  bindText("f_name", () => state.name, v => state.name = v);
+  bindText("f_title", () => state.title, v => state.title = v);
+  bindText("f_email", () => state.email, v => state.email = v);
+  bindText("f_phone", () => state.phone, v => state.phone = v);
+  bindText("f_loc", () => state.loc, v => state.loc = v);
+  bindText("f_summary", () => state.summary, v => state.summary = v);
+  bindText("f_skills", () => state.skills, v => state.skills = v);
+  bindText("l_company", () => state.letter.company, v => { state.letter.company = v; syncLetterDefaults(false); });
+  bindText("l_job", () => state.letter.job, v => { state.letter.job = v; syncLetterDefaults(false); });
+  bindText("l_manager", () => state.letter.manager, v => state.letter.manager = v);
+  bindText("l_source", () => state.letter.source, v => { state.letter.source = v; syncLetterDefaults(false); });
+  bindText("l_p1", () => state.letter.p1, v => state.letter.p1 = v);
+  bindText("l_p2", () => state.letter.p2, v => state.letter.p2 = v);
+  bindText("l_p3", () => state.letter.p3, v => state.letter.p3 = v);
+  ["p1", "p2", "p3"].forEach(k => document.getElementById("l_" + k).addEventListener("input", () => { letterEdited[k] = true; }));
+  renderJobs(); renderEdus();
+}
+function jobEntry(j, i) {
+  const wrap = document.createElement("div"); wrap.className = "entry";
+  wrap.innerHTML = '<div class="entry-head"><b>Job ' + (i + 1) + '</b><button type="button" class="small">Remove</button></div>' +
+    '<label>Job title</label><input type="text" data-k="title" placeholder="Cashier">' +
+    '<label>Company</label><input type="text" data-k="company" placeholder="Dollar General">' +
+    '<div class="row"><div><label>City, State</label><input type="text" data-k="loc" placeholder="Murfreesboro, TN"></div>' +
+    '<div><label>Start</label><input type="text" data-k="start" placeholder="Jan 2022"></div>' +
+    '<div><label>End</label><input type="text" data-k="end" placeholder="Present"></div></div>' +
+    '<label class="checkline"><input type="checkbox" data-k="current"> I currently work here</label>' +
+    '<label>What you did — one per line</label><textarea data-k="bullets" placeholder="Handled cash and card payments accurately&#10;Helped customers find products and answered questions"></textarea>';
+  wrap.querySelector("button").onclick = () => { state.jobs.splice(i, 1); if (!state.jobs.length) state.jobs.push(blank().jobs[0]); save(); renderJobs(); render(); };
+  wrap.querySelectorAll("input,textarea").forEach(el => {
+    const k = el.dataset.k;
+    if (el.type === "checkbox") { el.checked = !!j[k]; el.addEventListener("change", () => { j[k] = el.checked; save(); render(); }); }
+    else { el.value = j[k] || ""; el.addEventListener("input", () => { j[k] = el.value; save(); render(); }); }
+  });
+  return wrap;
+}
+function renderJobs() { const c = document.getElementById("jobs"); c.innerHTML = ""; state.jobs.forEach((j, i) => c.appendChild(jobEntry(j, i))); }
+function eduEntry(e, i) {
+  const wrap = document.createElement("div"); wrap.className = "entry";
+  wrap.innerHTML = '<div class="entry-head"><b>Education ' + (i + 1) + '</b><button type="button" class="small">Remove</button></div>' +
+    '<label>School</label><input type="text" data-k="school" placeholder="Western Governors University">' +
+    '<div class="row"><div><label>Degree / program</label><input type="text" data-k="degree" placeholder="BA Elementary Education (in progress)"></div>' +
+    '<div><label>Year</label><input type="text" data-k="year" placeholder="2029"></div></div>';
+  wrap.querySelector("button").onclick = () => { state.edus.splice(i, 1); save(); renderEdus(); render(); };
+  wrap.querySelectorAll("input").forEach(el => { const k = el.dataset.k; el.value = e[k] || ""; el.addEventListener("input", () => { e[k] = el.value; save(); render(); }); });
+  return wrap;
+}
+function renderEdus() { const c = document.getElementById("edus"); c.innerHTML = ""; state.edus.forEach((e, i) => c.appendChild(eduEntry(e, i))); }
+document.getElementById("btnAddJob").onclick = () => { state.jobs.push({ title: "", company: "", loc: "", start: "", end: "", current: false, bullets: "" }); save(); renderJobs(); };
+document.getElementById("btnAddEdu").onclick = () => { state.edus.push({ school: "", degree: "", year: "" }); save(); renderEdus(); };
+
+/* ---------- cover letter defaults ---------- */
+function letterDefaults() {
+  const L = state.letter;
+  const job = L.job || state.title || "";
+  const co = L.company || "your company";
+  const src = L.source ? " I saw the position posted on " + L.source + "." : "";
+  return {
+    p1: "I am excited to apply for the " + (job ? job + " position" : "open position") + " at " + co + "." + src + " With my background and strong work ethic, I would be a reliable addition to your team.",
+    p2: "In my recent work, I have built experience I can bring to this role right away. I show up on time, learn new systems quickly, and take pride in doing the job right. I work well with customers and coworkers alike, and I am comfortable handling responsibility without being watched over.",
+    p3: "I would welcome the chance to speak with you about how I can contribute to " + co + ". Thank you for your time and consideration — I look forward to hearing from you."
+  };
+}
+let letterEdited = {};
+function syncLetterDefaults(force) {
+  const d = letterDefaults();
+  ["p1", "p2", "p3"].forEach(k => {
+    if (force || !letterEdited[k]) { state.letter[k] = d[k]; document.getElementById("l_" + k).value = d[k]; }
+  });
+  save(); render();
+}
+
+/* ---------- rendering ---------- */
+function contactLine() {
+  return [state.loc, state.phone, state.email].filter(Boolean).map(esc).join(" &nbsp;·&nbsp; ");
+}
+function renderResume() {
+  const s = state;
+  let h = "";
+  const head = '<h1>' + esc(s.name || "Your Name") + '</h1>' +
+    (s.title ? '<div class="title-line">' + esc(s.title) + '</div>' : "") +
+    '<div class="contact">' + contactLine() + '</div>';
+  h += (s.template === "executive") ? '<div class="headband">' + head + '</div>' : head;
+  if (s.summary) h += '<h2>Summary</h2><p>' + esc(s.summary) + '</p>';
+  const jobs = s.jobs.filter(j => j.title || j.company);
+  if (jobs.length) {
+    h += '<h2>Experience</h2>';
+    jobs.forEach(j => {
+      const dates = [j.start, j.current ? "Present" : j.end].filter(Boolean).join(" – ");
+      h += '<div class="job-head"><span class="t">' + esc(j.title) + '</span><span class="d">' + esc(dates) + '</span></div>';
+      h += '<div class="job-sub">' + esc([j.company, j.loc].filter(Boolean).join(", ")) + '</div>';
+      const bl = (j.bullets || "").split("\n").map(x => x.trim()).filter(Boolean);
+      if (bl.length) h += '<ul>' + bl.map(b => '<li>' + esc(b.replace(/^[-•]\s*/, "")) + '</li>').join("") + '</ul>';
+    });
+  }
+  const edus = s.edus.filter(e => e.school || e.degree);
+  if (edus.length) {
+    h += '<h2>Education</h2>';
+    edus.forEach(e => {
+      h += '<div class="job-head"><span class="t">' + esc(e.school) + '</span><span class="d">' + esc(e.year) + '</span></div>';
+      if (e.degree) h += '<div class="job-sub">' + esc(e.degree) + '</div>';
+    });
+  }
+  const skills = (s.skills || "").split(",").map(x => x.trim()).filter(Boolean);
+  if (skills.length) h += '<h2>Skills</h2><p>' + skills.map(esc).join(" · ") + '</p>';
+  return h;
+}
+function renderLetter() {
+  const s = state, L = s.letter;
+  const mgr = L.manager ? esc(L.manager) : "Hiring Manager";
+  let h = '<div class="letter">';
+  h += '<div class="addr"><b>' + esc(s.name || "Your Name") + '</b><br>' + contactLine() + '</div>';
+  h += '<p>Dear ' + mgr + ',</p>';
+  h += '<p>' + esc(L.p1) + '</p><p>' + esc(L.p2) + '</p><p>' + esc(L.p3) + '</p>';
+  h += '<p>Sincerely,<br><b>' + esc(s.name || "Your Name") + '</b></p></div>';
+  return h;
+}
+function render() {
+  const page = document.getElementById("page");
+  page.className = "page tpl-" + state.template;
+  page.innerHTML = mode === "resume" ? renderResume() : renderLetter();
+}
+
+/* ---------- tabs ---------- */
+const tabR = document.getElementById("tabResume"), tabL = document.getElementById("tabLetter");
+function setMode(m) {
+  mode = m;
+  tabR.classList.toggle("active", m === "resume");
+  tabL.classList.toggle("active", m === "letter");
+  document.getElementById("paneResume").style.display = m === "resume" ? "" : "none";
+  document.getElementById("paneLetter").style.display = m === "letter" ? "" : "none";
+  if (m === "letter") syncLetterDefaults(false);
+  render();
+}
+tabR.onclick = () => setMode("resume");
+tabL.onclick = () => setMode("letter");
+
+/* ---------- unlock ---------- */
+const dlg = document.getElementById("dlgUnlock");
+function openUnlock() { document.getElementById("codeMsg").textContent = ""; dlg.showModal(); }
+document.getElementById("btnUnlockTop").onclick = openUnlock;
+document.getElementById("btnUnlock2").onclick = openUnlock;
+document.getElementById("btnCloseDlg").onclick = () => dlg.close();
+async function sha16(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+}
+document.getElementById("btnApplyCode").onclick = async () => {
+  const code = document.getElementById("codeInput").value.trim().toUpperCase();
+  const msg = document.getElementById("codeMsg");
+  if (!code) { msg.className = "msg err"; msg.textContent = "Enter your code first."; return; }
+  const h = await sha16(code);
+  if (PRO_HASHES.includes(h)) {
+    pro = true; localStorage.setItem(LS_PRO, "1");
+    msg.className = "msg ok"; msg.textContent = "Pro unlocked — enjoy all six templates!";
+    document.getElementById("proBar").style.display = "none";
+    renderTemplates();
+    setTimeout(() => dlg.close(), 900);
+  } else {
+    msg.className = "msg err"; msg.textContent = "That code doesn't match. Check your receipt email and try again.";
+  }
+};
+if (pro) document.getElementById("proBar").style.display = "none";
+
+/* ---------- top buttons ---------- */
+document.getElementById("btnPrint").onclick = () => window.print();
+document.getElementById("btnClear").onclick = () => {
+  if (!confirm("Clear everything and start over?")) return;
+  state = blank(); localStorage.removeItem(LS_KEY); letterEdited = {};
+  document.querySelectorAll("input,textarea").forEach(el => { if (el.type !== "checkbox") el.value = ""; });
+  bindAll(); renderTemplates(); render();
+};
+document.getElementById("btnSample").onclick = () => {
+  state = {
+    template: state.template,
+    name: "Jordan Smith", title: "Customer Service Representative",
+    email: "jordansmith@email.com", phone: "(615) 555-0148", loc: "Murfreesboro, TN",
+    summary: "Friendly, dependable customer service worker with 4 years of retail experience. Known for staying calm with difficult customers, keeping lines moving, and showing up on time, every time. Looking for a full-time role with a team that values reliability.",
+    skills: "Cash handling, Point-of-sale systems, Microsoft Word, Scheduling, De-escalation, Inventory counts",
+    jobs: [
+      { title: "Cashier", company: "Dollar General", loc: "Christiana, TN", start: "Mar 2022", end: "", current: true, bullets: "Ran register for 100+ customers per shift with a balanced drawer\nHelped customers find products and answered questions\nTrained 3 new cashiers on register and store closing" },
+      { title: "Stocker", company: "Food Lion", loc: "Murfreesboro, TN", start: "Jun 2020", end: "Feb 2022", current: false, bullets: "Stocked shelves and rotated products to keep displays full\nUnloaded delivery trucks and organized the back room" }
+    ],
+    edus: [ { school: "Riverdale High School", degree: "High School Diploma", year: "2019" } ],
+    letter: { company: "", job: "", manager: "", source: "", p1: "", p2: "", p3: "" }
+  };
+  save();
+  letterEdited = {};
+  bindAll(); syncLetterDefaults(true); renderTemplates(); render();
+};
+
+bindAll();
+renderTemplates();
+render();
+</script>
+</body>
+</html>
