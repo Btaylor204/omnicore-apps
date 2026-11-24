@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mighty Thorn Resume Builder — Resume & Cover Letter Builder | OmniCore Works</title>
-<meta name="description" content="Build a clean, professional resume and cover letter in minutes. Free templates, print or save as PDF. By OmniCore Works.">
+<meta name="description" content="Build a clean, professional resume and cover letter in minutes — then let Pro autofill your job applications with your own information. Free templates, print or save as PDF. By OmniCore Works.">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -108,6 +108,15 @@
   dialog p { font-size: 14px; line-height: 1.5; margin-bottom: 10px; }
   .msg { font-size: 13px; margin-top: 8px; min-height: 18px; }
   .msg.ok { color: var(--good); } .msg.err { color: #b3261e; }
+  /* ---------- autofill pane ---------- */
+  .fillrow { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; margin-bottom: 8px; background: #fbfcfe; }
+  .fillrow .fl { flex: 0 0 118px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding-top: 3px; }
+  .fillrow .fv { flex: 1; font-size: 14px; word-break: break-word; white-space: pre-wrap; }
+  .fillrow button { flex: 0 0 auto; }
+  a.bmk { display: inline-block; background: var(--accent2); color: #fff; font-weight: 700; padding: 12px 18px; border-radius: 10px; text-decoration: none; cursor: grab; font-size: 15px; }
+  .fillnote { background: #eef4ff; border: 1px solid #c7dbff; border-radius: 10px; padding: 12px; font-size: 14px; line-height: 1.55; margin-bottom: 14px; }
+  .fillnote ol { margin: 8px 0 0 20px; }
+  .fillnote li { margin-bottom: 4px; }
   footer.note { text-align: center; color: var(--muted); font-size: 12.5px; padding: 6px 16px 22px; line-height: 1.5; }
   @media (max-width: 900px) {
     .layout { flex-direction: column; }
@@ -142,6 +151,7 @@
     <div class="tabs">
       <button type="button" id="tabResume" class="active">Resume</button>
       <button type="button" id="tabLetter">Cover Letter</button>
+      <button type="button" id="tabFill">Autofill ⚡</button>
     </div>
 
     <div id="paneResume">
@@ -160,6 +170,12 @@
       </div>
       <label>City, State</label>
       <input type="text" id="f_loc" placeholder="Nashville, TN">
+      <div class="row">
+        <div><label>Street address (for autofill)</label><input type="text" id="f_addr" placeholder="123 Main St"></div>
+        <div><label>ZIP code (for autofill)</label><input type="text" id="f_zip" placeholder="37201"></div>
+      </div>
+      <label>LinkedIn or website (for autofill)</label>
+      <input type="text" id="f_link" placeholder="linkedin.com/in/yourname">
       <label>Professional summary</label>
       <textarea id="f_summary" placeholder="2–3 sentences: your experience, your strengths, and the kind of job you want."></textarea>
 
@@ -196,8 +212,13 @@
       <p class="hint">The letter uses the name, email, and phone from the Resume tab. Edit any paragraph — it updates live.</p>
     </div>
 
+    <div id="paneFill" style="display:none">
+      <h3 class="sec">Application Autofill — a Pro feature</h3>
+      <div id="fillBody"></div>
+    </div>
+
     <div class="probar" id="proBar">
-      <b>Mighty Thorn Resume Pro — $14.99, one time.</b> Unlocks the Executive, Bold, and Fresh templates for both your resume and cover letter, forever.
+      <b>Mighty Thorn Resume Pro — $14.99, one time.</b> Unlocks the Executive, Bold, and Fresh templates for both your resume and cover letter — <b>plus the Application Autofill kit</b>: a personal autofill button that fills in job applications with the information from your resume, and one-tap copy for every common application answer. Yours forever.
       <a href="https://btaylor204.gumroad.com/l/thornresume" target="_blank" rel="noopener">Get Pro on Gumroad</a> — after checkout, forward your Gumroad receipt to <b>2225btaylor@gmail.com</b> and we'll email your unlock code. Then tap “I have a code.”
       <div style="margin-top:8px"><button type="button" class="small" id="btnUnlock2">I have a code</button></div>
     </div>
@@ -213,7 +234,7 @@
 
 <dialog id="dlgUnlock">
   <h3>Unlock Pro</h3>
-  <p>Enter the unlock code we emailed you. (After buying Pro, forward your Gumroad receipt to 2225btaylor@gmail.com and we'll send your code.) Pro unlocks the Executive, Bold, and Fresh templates on this device, forever.</p>
+  <p>Enter the unlock code we emailed you. (After buying Pro, forward your Gumroad receipt to 2225btaylor@gmail.com and we'll send your code.) Pro unlocks the Executive, Bold, and Fresh templates — plus the Application Autofill kit — on this device, forever.</p>
   <input type="text" id="codeInput" placeholder="HR-XXXX-XXXX" autocomplete="off">
   <div class="msg" id="codeMsg"></div>
   <div style="display:flex;gap:8px;margin-top:10px">
@@ -242,13 +263,13 @@ let state = load() || blank();
 function blank() {
   return {
     template: "classic",
-    name: "", title: "", email: "", phone: "", loc: "", summary: "", skills: "",
+    name: "", title: "", email: "", phone: "", loc: "", addr: "", zip: "", link: "", summary: "", skills: "",
     jobs: [ { title: "", company: "", loc: "", start: "", end: "", current: false, bullets: "" } ],
     edus: [ { school: "", degree: "", year: "" } ],
     letter: { company: "", job: "", manager: "", source: "", p1: "", p2: "", p3: "" }
   };
 }
-function load() { try { const s = JSON.parse(localStorage.getItem(LS_KEY)); return s && s.jobs ? s : null; } catch (e) { return null; } }
+function load() { try { const s = JSON.parse(localStorage.getItem(LS_KEY)); if (!s || !s.jobs) return null; const b = blank(); Object.keys(b).forEach(k => { if (s[k] === undefined) s[k] = b[k]; }); return s; } catch (e) { return null; } }
 function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
 function esc(s) { return String(s || "").replace(/[&<>""]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
@@ -280,6 +301,9 @@ function bindAll() {
   bindText("f_email", () => state.email, v => state.email = v);
   bindText("f_phone", () => state.phone, v => state.phone = v);
   bindText("f_loc", () => state.loc, v => state.loc = v);
+  bindText("f_addr", () => state.addr, v => state.addr = v);
+  bindText("f_zip", () => state.zip, v => state.zip = v);
+  bindText("f_link", () => state.link, v => state.link = v);
   bindText("f_summary", () => state.summary, v => state.summary = v);
   bindText("f_skills", () => state.skills, v => state.skills = v);
   bindText("l_company", () => state.letter.company, v => { state.letter.company = v; syncLetterDefaults(false); });
@@ -394,22 +418,167 @@ function renderLetter() {
 function render() {
   const page = document.getElementById("page");
   page.className = "page tpl-" + state.template;
-  page.innerHTML = mode === "resume" ? renderResume() : renderLetter();
+  page.innerHTML = mode === "letter" ? renderLetter() : renderResume();
+  if (mode === "fill") renderAutofill();
 }
 
 /* ---------- tabs ---------- */
-const tabR = document.getElementById("tabResume"), tabL = document.getElementById("tabLetter");
+const tabR = document.getElementById("tabResume"), tabL = document.getElementById("tabLetter"), tabF = document.getElementById("tabFill");
 function setMode(m) {
   mode = m;
   tabR.classList.toggle("active", m === "resume");
   tabL.classList.toggle("active", m === "letter");
+  tabF.classList.toggle("active", m === "fill");
   document.getElementById("paneResume").style.display = m === "resume" ? "" : "none";
   document.getElementById("paneLetter").style.display = m === "letter" ? "" : "none";
+  document.getElementById("paneFill").style.display = m === "fill" ? "" : "none";
   if (m === "letter") syncLetterDefaults(false);
   render();
 }
 tabR.onclick = () => setMode("resume");
 tabL.onclick = () => setMode("letter");
+tabF.onclick = () => setMode("fill");
+
+/* ---------- autofill kit (Pro) ---------- */
+function fillData() {
+  const s = state;
+  const parts = (s.name || "").trim().split(/\s+/).filter(Boolean);
+  const locParts = (s.loc || "").split(",").map(x => x.trim());
+  const job = s.jobs.find(j => j.title || j.company) || {};
+  const edu = s.edus.find(e => e.school || e.degree) || {};
+  const cover = [s.letter.p1, s.letter.p2, s.letter.p3].filter(Boolean).join("\n\n");
+  return {
+    full: s.name || "", first: parts[0] || "", last: parts.slice(1).join(" "),
+    email: s.email || "", phone: s.phone || "",
+    addr: s.addr || "", city: locParts[0] || "", state: locParts[1] || "", zip: s.zip || "",
+    link: s.link || "", title: job.title || s.title || "", company: job.company || "",
+    school: edu.school || "", degree: edu.degree || "",
+    summary: s.summary || "", cover: cover, skills: s.skills || ""
+  };
+}
+function __mtFill(D) {
+  function lab(el) {
+    var t = "";
+    try {
+      if (el.id) { var l = document.querySelector('label[for="' + el.id + '"]'); if (l) t = l.textContent; }
+      if (!t && el.closest) { var w = el.closest("label"); if (w) t = w.textContent; }
+    } catch (e) {}
+    return (t + " " + (el.getAttribute("aria-label") || "") + " " + (el.placeholder || "") + " " + (el.name || "") + " " + (el.id || "") + " " + (el.getAttribute("autocomplete") || "")).toLowerCase();
+  }
+  function setV(el, v) {
+    if (el.tagName === "SELECT") {
+      for (var i = 0; i < el.options.length; i++) {
+        var o = el.options[i];
+        if (o.value.toLowerCase() === v.toLowerCase() || o.text.toLowerCase().indexOf(v.toLowerCase()) === 0) { el.selectedIndex = i; break; }
+      }
+    } else {
+      var proto = el.tagName === "TEXTAREA" ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+      var setter = Object.getOwnPropertyDescriptor(proto, "value").set;
+      setter.call(el, v);
+    }
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  var RULES = [
+    [/first[\s_-]?name|given[\s_-]?name|fname/, "first"],
+    [/last[\s_-]?name|family[\s_-]?name|surname|lname/, "last"],
+    [/e-?mail/, "email"],
+    [/phone|mobile|cell|telephone/, "phone"],
+    [/linkedin/, "link"],
+    [/website|portfolio|\burl\b/, "link"],
+    [/street|address[\s_-]?1|mailing/, "addr"],
+    [/(^|\s)address(\s|$)/, "addr"],
+    [/city|town/, "city"],
+    [/state|province|region/, "state"],
+    [/zip|postal/, "zip"],
+    [/full[\s_-]?name|your[\s_-]?name|(^|\s)name(\s|$)/, "full"],
+    [/current.*(title|position|role)|most recent.*title/, "title"],
+    [/current.*(company|employer)|most recent.*(company|employer)/, "company"],
+    [/school|university|college/, "school"],
+    [/degree|education/, "degree"],
+    [/cover|summary|about you|tell us|why.*(fit|interested|apply|join)/, "summary"],
+    [/skills/, "skills"]
+  ];
+  var n = 0;
+  var els = document.querySelectorAll("input, textarea, select");
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    var type = (el.getAttribute("type") || "").toLowerCase();
+    if (el.disabled || el.readOnly) continue;
+    if (["hidden", "file", "checkbox", "radio", "submit", "button", "password", "search"].indexOf(type) >= 0) continue;
+    if (el.value && el.value.trim()) continue;
+    var L = lab(el);
+    for (var r = 0; r < RULES.length; r++) {
+      var key = RULES[r][1];
+      var v = key === "summary" ? (el.tagName === "TEXTAREA" ? (D.cover || D.summary) : "") : D[key];
+      if (!v) continue;
+      if (RULES[r][0].test(L)) { setV(el, v); n++; break; }
+    }
+  }
+  var t = document.createElement("div");
+  t.textContent = n > 0 ? ("Mighty Thorn Autofill filled in " + n + " field" + (n === 1 ? "" : "s") + " — please check everything before you submit.") : "Mighty Thorn Autofill: no matching empty fields found on this page. Try the quick-copy answers in the builder instead.";
+  t.style.cssText = "position:fixed;z-index:999999;left:50%;top:18px;transform:translateX(-50%);background:#1c2430;color:#fff;padding:12px 18px;border-radius:10px;font:600 14px/1.4 -apple-system,'Segoe UI',Roboto,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:90vw;text-align:center";
+  document.body.appendChild(t);
+  setTimeout(function () { t.remove(); }, 6000);
+}
+function bookmarkletHref() {
+  return "javascript:" + encodeURIComponent("(" + __mtFill.toString() + ")(" + JSON.stringify(fillData()) + ")");
+}
+function copyText(txt, btn) {
+  function done() { if (btn) { const old = btn.textContent; btn.textContent = "Copied ✓"; setTimeout(() => { btn.textContent = old; }, 1400); } }
+  if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt).then(done).catch(() => fallback()); } else fallback();
+  function fallback() {
+    const ta = document.createElement("textarea");
+    ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); } catch (e) {}
+    ta.remove();
+  }
+}
+function renderAutofill() {
+  const box = document.getElementById("fillBody");
+  if (!box) return;
+  if (!pro) {
+    box.innerHTML = '<div class="fillnote"><b>Fill in job applications with one click.</b><br>' +
+      'Pro turns the information in your resume into your personal <b>Autofill button</b>. Add it to your browser once, then open any job application and click it — your name, email, phone, address, work history, and more fill themselves in. Plus one-tap copy buttons for every common application answer, for the sites that need a paste instead.' +
+      '<div style="margin-top:10px"><button type="button" class="primary" id="fillUnlockBtn">Unlock Pro — $14.99 one time</button></div>' +
+      '<p class="hint" style="margin-top:8px">Already bought Pro? Use “I have a code” below, or “Unlock Pro” at the top.</p></div>';
+    document.getElementById("fillUnlockBtn").onclick = openUnlock;
+    return;
+  }
+  const d = fillData();
+  const rows = [
+    ["Full name", d.full], ["First name", d.first], ["Last name", d.last],
+    ["Email", d.email], ["Phone", d.phone], ["Street address", d.addr],
+    ["City", d.city], ["State", d.state], ["ZIP code", d.zip],
+    ["LinkedIn / website", d.link], ["Current job title", d.title], ["Current company", d.company],
+    ["School", d.school], ["Degree", d.degree], ["Skills", d.skills],
+    ["Summary", d.summary], ["Cover letter", d.cover]
+  ].filter(r => r[1]);
+  let h = '<div class="fillnote"><b>Your personal Autofill button is ready.</b>' +
+    '<ol><li>Drag this button up to your browser\'s bookmarks bar: <a class="bmk" id="bmkLink" href="#">⚡ Fill my application</a></li>' +
+    '<li>Open any job application in the same browser.</li>' +
+    '<li>Click the button in your bookmarks bar — your information fills in. Always check it before submitting.</li></ol>' +
+    '<p style="margin-top:8px">On a phone or tablet? Tap “Copy the autofill code,” create a new bookmark for any page, then edit the bookmark\'s address and paste the code in its place.</p>' +
+    '<div style="margin-top:8px"><button type="button" class="small" id="btnCopyCode">Copy the autofill code</button></div></div>';
+  h += '<h3 class="sec">Your application answers — tap to copy</h3>';
+  if (!rows.length) h += '<p class="hint">Fill in your information on the Resume tab first — your answers will show up here.</p>';
+  rows.forEach((r, i) => {
+    h += '<div class="fillrow"><div class="fl">' + esc(r[0]) + '</div><div class="fv">' + esc(r[1]) + '</div><button type="button" class="small" data-copy="' + i + '">Copy</button></div>';
+  });
+  if (rows.length) h += '<div style="margin-top:6px"><button type="button" class="small" id="btnCopyAll">Copy all answers at once</button></div>';
+  h += '<p class="hint" style="margin-top:10px">Honest note: the Autofill button works on most application sites, but some sites block it or load their form in a way it can\'t reach — for those, use the copy buttons above. Your information stays in the button on your own device; it is never sent anywhere by us.</p>';
+  box.innerHTML = h;
+  const bmk = document.getElementById("bmkLink");
+  bmk.href = bookmarkletHref();
+  bmk.addEventListener("click", e => { e.preventDefault(); alert("Drag this button to your bookmarks bar — clicking it here does nothing. Then click it while you are on a job application page."); });
+  document.getElementById("btnCopyCode").onclick = e => copyText(bookmarkletHref(), e.target);
+  box.querySelectorAll("[data-copy]").forEach(btn => {
+    btn.onclick = () => copyText(rows[Number(btn.dataset.copy)][1], btn);
+  });
+  const all = document.getElementById("btnCopyAll");
+  if (all) all.onclick = e => copyText(rows.map(r => r[0] + ": " + r[1]).join("\n"), e.target);
+}
 
 /* ---------- unlock ---------- */
 const dlg = document.getElementById("dlgUnlock");
@@ -428,9 +597,10 @@ document.getElementById("btnApplyCode").onclick = async () => {
   const h = await sha16(code);
   if (PRO_HASHES.includes(h)) {
     pro = true; localStorage.setItem(LS_PRO, "1");
-    msg.className = "msg ok"; msg.textContent = "Pro unlocked — enjoy all six templates!";
+    msg.className = "msg ok"; msg.textContent = "Pro unlocked — all six templates plus the Autofill kit!";
     document.getElementById("proBar").style.display = "none";
     renderTemplates();
+    if (mode === "fill") renderAutofill();
     setTimeout(() => dlg.close(), 900);
   } else {
     msg.className = "msg err"; msg.textContent = "That code doesn't match. Check your receipt email and try again.";
@@ -451,6 +621,7 @@ document.getElementById("btnSample").onclick = () => {
     template: state.template,
     name: "Jordan Smith", title: "Customer Service Representative",
     email: "jordansmith@email.com", phone: "(615) 555-0148", loc: "Murfreesboro, TN",
+    addr: "1204 Mercury Blvd", zip: "37130", link: "linkedin.com/in/jordansmith",
     summary: "Friendly, dependable customer service worker with 4 years of retail experience. Known for staying calm with difficult customers, keeping lines moving, and showing up on time, every time. Looking for a full-time role with a team that values reliability.",
     skills: "Cash handling, Point-of-sale systems, Microsoft Word, Scheduling, De-escalation, Inventory counts",
     jobs: [
