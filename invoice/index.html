@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mighty Thorn Invoice Maker — Invoices & Payment Reminders for Small Shops</title>
+<meta name="description" content="Create professional invoices in minutes, track who owes you, and send polite payment reminders. Built for small shops and solo businesses. Your data never leaves your device.">
+<style>
+:root{
+  --ink:#1d1a24; --muted:#6b6577; --bg:#f6f4fa; --card:#ffffff; --line:#e5e0ef;
+  --accent:#5b3df0; --accent-dark:#4629c9; --good:#177245; --warn:#b3261e; --amber:#9a6a00;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+.wrap{max-width:980px;margin:0 auto;padding:16px 14px 90px}
+header.app{display:flex;align-items:center;gap:12px;padding:10px 2px 14px;flex-wrap:wrap}
+.logo-mark{width:44px;height:44px;border-radius:12px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex:none}
+header.app h1{font-size:21px;margin:0}
+header.app .sub{color:var(--muted);font-size:13px;margin:1px 0 0}
+.spacer{flex:1}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.badge.free{background:#e9e5f7;color:var(--accent-dark)}
+.badge.pro{background:var(--accent);color:#fff}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;font-weight:600}
+button:hover{border-color:#c9c0e3}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{background:var(--accent-dark)}
+button.ghost{background:transparent}
+button.small{padding:5px 10px;font-size:13px}
+button.danger{color:var(--warn)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.tabs button{border-radius:999px;padding:8px 16px}
+.tabs button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.card h2{font-size:16px;margin:0 0 10px}
+.card h3{font-size:14px;margin:14px 0 8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:640px){.grid,.grid3{grid-template-columns:1fr}}
+label.f{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],select,textarea{
+  width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font:inherit;background:#fff;color:var(--ink)}
+textarea{resize:vertical;min-height:64px}
+.field{margin-bottom:10px}
+table.items{width:100%;border-collapse:collapse;margin:6px 0}
+table.items th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:4px 6px}
+table.items td{padding:4px 6px;vertical-align:top}
+table.items input{padding:7px 8px}
+table.items .amt{text-align:right;font-weight:700;white-space:nowrap;padding-top:12px}
+.totals{margin-left:auto;max-width:320px;width:100%}
+.totals .row{display:flex;justify-content:space-between;padding:3px 0;font-size:14px}
+.totals .row.grand{font-size:18px;font-weight:800;border-top:2px solid var(--ink);margin-top:6px;padding-top:8px}
+.totals .row.due{font-weight:700;color:var(--accent-dark)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:140px}
+.chip .n{font-size:20px;font-weight:800}
+.chip .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.inv-row{display:flex;gap:10px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.inv-row:last-child{border-bottom:none}
+.inv-row .who{flex:1;min-width:160px}
+.inv-row .who b{display:block}
+.inv-row .who span{color:var(--muted);font-size:13px}
+.inv-row .money{text-align:right;font-weight:800;min-width:90px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.pill.draft{background:#eceaf2;color:#555}
+.pill.sent{background:#e3ecff;color:#1d4fa1}
+.pill.paid{background:#dff3e7;color:var(--good)}
+.pill.overdue{background:#fde3e1;color:var(--warn)}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+.probar{background:linear-gradient(135deg,#5b3df0,#7b5cff);color:#fff;border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.probar b{font-size:15px}
+.probar span{opacity:.92;font-size:13px}
+.probar button{background:#fff;color:var(--accent-dark);border:none}
+.locked{border:2px dashed #c9c0e3;border-radius:var(--radius);padding:22px;text-align:center;background:#fbfaff}
+.reminder-box{background:#fbf9ff;border:1px solid var(--line);border-radius:10px;padding:12px;white-space:pre-wrap;font-size:14px;margin:8px 0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60;max-width:92vw;text-align:center}
+.toast.show{opacity:1}
+dialog{border:none;border-radius:16px;padding:22px;max-width:420px;width:92vw;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(20,16,40,.45)}
+dialog h2{margin-top:0}
+.note{font-size:13px;color:var(--muted)}
+.kbd-hint{font-size:12px;color:var(--muted)}
+.flexrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.right{margin-left:auto}
+.logo-preview{max-height:64px;max-width:200px;border:1px solid var(--line);border-radius:8px;padding:4px;background:#fff}
+input[type=color]{width:56px;height:38px;padding:2px;border:1px solid var(--line);border-radius:9px;background:#fff}
+#printArea{display:none}
+@media print{
+  body{background:#fff}
+  .wrap, .toast{display:none !important}
+  #printArea{display:block;font-family:Georgia,'Times New Roman',serif;color:#111;padding:24px}
+  #printArea .p-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--accent);padding-bottom:12px;margin-bottom:16px}
+  #printArea h1{font-size:26px;margin:0}
+  #printArea table{width:100%;border-collapse:collapse;margin:14px 0}
+  #printArea th{text-align:left;border-bottom:2px solid #111;padding:6px 4px;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  #printArea td{padding:6px 4px;border-bottom:1px solid #ddd}
+  #printArea .p-totals{margin-left:auto;max-width:300px}
+  #printArea .p-totals .row{display:flex;justify-content:space-between;padding:3px 0}
+  #printArea .p-totals .grand{font-weight:800;font-size:17px;border-top:2px solid #111;margin-top:6px;padding-top:6px}
+  #printArea .p-meta{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  #printArea .p-logo{max-height:70px;max-width:220px}
+  #printArea .small{font-size:12px;color:#444}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app">
+    <div class="logo-mark">MT</div>
+    <div>
+      <h1>Mighty Thorn Invoice Maker</h1>
+      <p class="sub">Invoices, tracking &amp; payment reminders for small shops</p>
+    </div>
+    <div class="spacer"></div>
+    <span id="proBadge" class="badge free">Free</span>
+    <button id="unlockBtn" class="primary small">Unlock Pro</button>
+  </header>
+
+  <div id="proBar" class="probar">
+    <div>
+      <b>Go Pro — unlimited invoices, your logo, and the payment-reminder kit</b><br>
+      <span>Free includes 5 invoices. Pro unlocks everything, one code, yours forever.</span>
+    </div>
+    <div class="spacer"></div>
+    <button id="proBarBtn">Unlock Pro</button>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="list" class="active">Invoices</button>
+    <button data-tab="edit">New Invoice</button>
+    <button data-tab="biz">My Business</button>
+    <button data-tab="remind">Reminders <span class="badge pro" style="font-size:9px">PRO</span></button>
+  </nav>
+
+  <!-- LIST TAB -->
+  <section id="tab-list">
+    <div class="chips" id="statChips"></div>
+    <div class="card">
+      <div class="flexrow">
+        <h2 style="margin:0">Your invoices</h2>
+        <div class="spacer"></div>
+        <button class="primary" id="newInvBtn">+ New invoice</button>
+      </div>
+      <div id="invList"></div>
+    </div>
+    <p class="note">Everything is stored only on this device — no account, no cloud. Use Print / Save PDF on an invoice to send it to your customer.</p>
+  </section>
+
+  <!-- EDITOR TAB -->
+  <section id="tab-edit" hidden>
+    <div class="card">
+      <h2 id="editTitle">New invoice</h2>
+      <div class="grid">
+        <div class="field"><label class="f" for="f_cust">Customer name *</label><input type="text" id="f_cust" placeholder="e.g. Smith's Auto Repair"></div>
+        <div class="field"><label class="f" for="f_custEmail">Customer email</label><input type="email" id="f_custEmail" placeholder="customer@email.com"></div>
+      </div>
+      <div class="field"><label class="f" for="f_custAddr">Customer address</label><input type="text" id="f_custAddr" placeholder="Street, City, State ZIP"></div>
+      <div class="grid3">
+        <div class="field"><label class="f" for="f_num">Invoice #</label><input type="text" id="f_num"></div>
+        <div class="field"><label class="f" for="f_issue">Issue date</label><input type="date" id="f_issue"></div>
+        <div class="field"><label class="f" for="f_due">Due date</label><input type="date" id="f_due"></div>
+      </div>
+      <div class="field">
+        <label class="f">Payment terms</label>
+        <div class="flexrow" id="termsBtns">
+          <button type="button" class="small" data-days="0">Due on receipt</button>
+          <button type="button" class="small" data-days="7">Net 7</button>
+          <button type="button" class="small" data-days="14">Net 14</button>
+          <button type="button" class="small" data-days="30">Net 30</button>
+        </div>
+      </div>
+
+      <h3>Items</h3>
+      <table class="items">
+        <thead><tr><th style="width:46%">Description</th><th style="width:14%">Qty</th><th style="width:18%">Rate</th><th style="width:16%;text-align:right">Amount</th><th style="width:6%"></th></tr></thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+      <button type="button" class="small" id="addItemBtn">+ Add item</button>
+
+      <div class="grid3" style="margin-top:14px">
+        <div class="field"><label class="f" for="f_tax">Tax %</label><input type="number" id="f_tax" step="0.01" min="0" value="0"></div>
+        <div class="field"><label class="f" for="f_disc">Discount $</label><input type="number" id="f_disc" step="0.01" min="0" value="0"></div>
+        <div class="field"><label class="f" for="f_ship">Shipping $</label><input type="number" id="f_ship" step="0.01" min="0" value="0"></div>
+      </div>
+      <div class="grid">
+        <div class="field"><label class="f" for="f_paid">Amount already paid $</label><input type="number" id="f_paid" step="0.01" min="0" value="0"></div>
+        <div class="field"><label class="f" for="f_status">Status</label>
+          <select id="f_status">
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label class="f" for="f_notes">Notes for customer</label><textarea id="f_notes" placeholder="Thank you for your business!"></textarea></div>
+
+      <div class="totals" id="totalsBox"></div>
+
+      <div class="flexrow" style="margin-top:14px">
+        <button class="primary" id="saveInvBtn">Save invoice</button>
+        <button id="printBtn">Print / Save PDF</button>
+        <button class="ghost" id="cancelEditBtn">Cancel</button>
+        <div class="spacer"></div>
+        <button class="danger ghost" id="deleteInvBtn" hidden>Delete</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUSINESS TAB -->
+  <section id="tab-biz" hidden>
+    <div class="card">
+      <h2>My business</h2>
+      <p class="note">This appears on every invoice you print.</p>
+      <div class="grid">
+        <div class="field"><label class="f" for="b_name">Business name *</label><input type="text" id="b_name" placeholder="Your shop name"></div>
+        <div class="field"><label class="f" for="b_email">Email</label><input type="email" id="b_email"></div>
+      </div>
+      <div class="grid">
+        <div class="field"><label class="f" for="b_phone">Phone</label><input type="tel" id="b_phone"></div>
+        <div class="field"><label class="f" for="b_web">Website</label><input type="text" id="b_web" placeholder="yourshop.com"></div>
+      </div>
+      <div class="field"><label class="f" for="b_addr">Address</label><input type="text" id="b_addr" placeholder="Street, City, State ZIP"></div>
+      <div class="field"><label class="f" for="b_pay">How customers pay you</label><textarea id="b_pay" placeholder="e.g. Cash, check, Venmo @yourshop, or card in store"></textarea></div>
+      <div class="grid">
+        <div class="field"><label class="f" for="b_tax">Default tax %</label><input type="number" id="b_tax" step="0.01" min="0" value="0"></div>
+        <div class="field"><label class="f" for="b_terms">Default terms (days)</label>
+          <select id="b_terms"><option value="0">Due on receipt</option><option value="7">Net 7</option><option value="14">Net 14</option><option value="30" selected>Net 30</option></select>
+        </div>
+      </div>
+      <div class="field" id="logoField">
+        <label class="f">Logo <span class="badge pro" style="font-size:9px">PRO</span></label>
+        <div class="flexrow">
+          <input type="file" id="b_logo" accept="image/*">
+          <img id="logoPreview" class="logo-preview" alt="Your logo" hidden>
+          <button type="button" class="small ghost" id="logoRemove" hidden>Remove</button>
+        </div>
+        <p class="kbd-hint">Shown at the top of printed invoices.</p>
+      </div>
+      <div class="field" id="colorField">
+        <label class="f">Invoice accent color <span class="badge pro" style="font-size:9px">PRO</span></label>
+        <input type="color" id="b_color" value="#5b3df0">
+      </div>
+      <button class="primary" id="saveBizBtn">Save business info</button>
+    </div>
+  </section>
+
+  <!-- REMINDERS TAB -->
+  <section id="tab-remind" hidden>
+    <div id="remindLocked" class="locked">
+      <h2 style="margin-top:0">Payment-reminder kit <span class="badge pro">PRO</span></h2>
+      <p>Pick an unpaid invoice and get three ready-to-send reminder messages — friendly, firm, and final — with the customer's name, amount, and due date filled in. Copy, paste, get paid.</p>
+      <button class="primary" id="remindUnlockBtn">Unlock Pro</button>
+    </div>
+    <div id="remindBody" hidden>
+      <div class="card">
+        <h2>Payment reminders</h2>
+        <div class="field"><label class="f" for="r_pick">Unpaid invoice</label><select id="r_pick"></select></div>
+        <div id="r_out"></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note" style="text-align:center;margin-top:20px">Mighty Thorn Invoice Maker · OmniCore Works · Your data stays on this device</p>
+</div>
+
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+
+<dialog id="unlockDialog">
+  <h2>Unlock Pro</h2>
+  <p>Pro unlocks unlimited invoices, your logo and colors on printed invoices, and the payment-reminder kit.</p>
+  <p class="note">Bought Pro on Gumroad? Forward your receipt to <b>2225btaylor@gmail.com</b> and you'll get your unlock code by reply. Already have a code? Enter it here:</p>
+  <div class="field"><label class="f" for="codeInput">Unlock code</label><input type="text" id="codeInput" placeholder="TI-XXXX-XXXX" autocomplete="off"></div>
+  <div class="flexrow">
+    <button class="primary" id="codeSubmit">Unlock</button>
+    <button class="ghost" id="codeCancel">Cancel</button>
+  </div>
+  <p class="note" id="codeMsg"></p>
+</dialog>
+
+<script>
+"use strict";
+const PRO_HASHES = ["9acf1893877b56add2e4d1c9d8322a55f9d688d487d04981197dcc06a9e7773f","ecde468531c421179fa664cc961bf4a79866cab0bb7109cb2bc2e21e46387443","b358b306bf3c58adfe536a2efe8b66c3a9a66059ea0f9f0848f47667007ae3c9","d16a7c8b00007b0286efa46fec876f6a7d67d1c6a961a0e096bea5cae334314a","0858c5dfb499b0a633eb0482fa4cfead6feb75402920b5a4f1b4360ffda97c54","dbf2ec72fa34a2b27929a7d890b05544ab6d49e19826b482ae47769d29365913","a545f216694ff112a293c021e0a79aa70fb2de1cde04de590f1c79fe4300b4b3","7fd77a0fbab71a600ddcf0ccfb4af852a977402743657d59be04062bddbea3d4","98022caf4a9aae7c3c8f71bf3e150842f61a4b0abdbc0fa417c73a32d49eee88","9862d8db30d1f221dc997a88230499360425862c851c26f6a45fe863b9772a66","1c37d81c4a1fb2c9cd1cfa427aa89e582591fedb6fbdf24420ce3a3c5210460c","93be08dad56df6bf4b33b6aa6b6b1623a2af09d72e68e697cb084561b69ca0a3","b3bc0d186c1601d5379d93f3d30f31912aaa704343d95f198328377c39d1fae8","28fa6a93e7e7cc3a894d3970c71f3d21c074b039a789b70738e27df5faa0d627","55510d40e9339aef7e97c0afd942343c75b077be46271d170ad95c1fb5865036","be31c96ffe7adfa5ba644c1a24beec91ef3dc637623a1d2054360d7691a9614a","437b5218426951cf3900d5df632b1a953680ca7599d1659398467cf824d5e210","c313942bd0f2ebb277a5041aafb6ad0cbfba0fb4d69225d2fe1eeb576372260e","ce1043ebc7df8187f95d50f3dfad8500a906b117f7c69d686916eac18509f29f","56bf8dd01420279b42b6d7e302a2fbdb126e3ba56966d96ccba95e9daac8223c"];
+const FREE_LIMIT = 5;
+const KEY = "mt_invoice_state_v1";
+
+let state = load();
+let editingId = null;
+
+function defaults(){
+  return {
+    pro:false, seq:1001,
+    business:{name:"",email:"",phone:"",web:"",addr:"",pay:"",tax:0,terms:30,logo:"",color:"#5b3df0"},
+    invoices:[]
+  };
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return defaults();
+    const s = JSON.parse(raw);
+    const d = defaults();
+    return Object.assign(d, s, {business:Object.assign(d.business, s.business||{})});
+  }catch(e){ return defaults(); }
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function money(n){ const v = Number(n)||0; return "$" + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function num(v){ const n = parseFloat(v); return isFinite(n) ? n : 0; }
+function todayISO(){ const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function addDays(iso, days){ const d = new Date(iso+"T12:00:00"); d.setDate(d.getDate()+Number(days||0)); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function fmtDate(iso){ if(!iso) return ""; const d = new Date(iso+"T12:00:00"); return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"), 2600); }
+
+function invTotals(inv){
+  const sub = (inv.items||[]).reduce((s,it)=> s + num(it.qty)*num(it.rate), 0);
+  const taxAmt = Math.max(0, sub - num(inv.discount)) * num(inv.tax)/100;
+  const total = Math.max(0, sub - num(inv.discount)) + taxAmt + num(inv.ship);
+  const due = Math.max(0, total - num(inv.paid));
+  return {sub, taxAmt, total, due};
+}
+function effStatus(inv){
+  if(inv.status==="paid") return "paid";
+  if(inv.status==="sent" && inv.due && inv.due < todayISO() && invTotals(inv).due > 0) return "overdue";
+  return inv.status || "draft";
+}
+
+/* ---------- Tabs ---------- */
+$("tabs").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-tab]"); if(!b) return;
+  showTab(b.dataset.tab);
+});
+function showTab(name){
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
+  ["list","edit","biz","remind"].forEach(t=>{ $("tab-"+t).hidden = (t!==name); });
+  if(name==="list") renderList();
+  if(name==="remind") renderReminders();
+}
+
+/* ---------- Pro ---------- */
+function renderPro(){
+  const pro = state.pro;
+  $("proBadge").textContent = pro ? "Pro" : "Free";
+  $("proBadge").className = "badge " + (pro ? "pro" : "free");
+  $("unlockBtn").style.display = pro ? "none" : "";
+  $("proBar").style.display = pro ? "none" : "";
+  $("remindLocked").hidden = pro;
+  $("remindBody").hidden = !pro;
+  document.documentElement.style.setProperty("--accent", pro ? (state.business.color || "#5b3df0") : "#5b3df0");
+}
+function openUnlock(){ $("codeMsg").textContent=""; $("codeInput").value=""; $("unlockDialog").showModal(); }
+$("unlockBtn").addEventListener("click", openUnlock);
+$("proBarBtn").addEventListener("click", openUnlock);
+$("remindUnlockBtn").addEventListener("click", openUnlock);
+$("codeCancel").addEventListener("click", ()=> $("unlockDialog").close());
+$("codeSubmit").addEventListener("click", async ()=>{
+  const code = $("codeInput").value.trim().toUpperCase();
+  if(!code){ $("codeMsg").textContent = "Enter your code first."; return; }
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(code));
+  const hex = [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+  if(PRO_HASHES.includes(hex)){
+    state.pro = true; save(); renderPro(); $("unlockDialog").close();
+    toast("Pro unlocked — thank you!");
+    if(!$("tab-remind").hidden) renderReminders();
+  } else {
+    $("codeMsg").textContent = "That code didn't match. Check it and try again.";
+  }
+});
+
+/* ---------- List ---------- */
+function renderList(){
+  const invs = state.invoices.slice().sort((a,b)=> (b.issue||"").localeCompare(a.issue||""));
+  let owed=0, overdue=0, paidMonth=0;
+  const ym = todayISO().slice(0,7);
+  invs.forEach(inv=>{
+    const t = invTotals(inv), st = effStatus(inv);
+    if(st!=="paid" && st!=="draft") owed += t.due;
+    if(st==="overdue") overdue += t.due;
+    if(st==="paid" && (inv.issue||"").startsWith(ym)) paidMonth += t.total;
+  });
+  $("statChips").innerHTML =
+    '<div class="chip"><div class="n">'+money(owed)+'</div><div class="l">Owed to you</div></div>' +
+    '<div class="chip"><div class="n" style="color:var(--warn)">'+money(overdue)+'</div><div class="l">Overdue</div></div>' +
+    '<div class="chip"><div class="n" style="color:var(--good)">'+money(paidMonth)+'</div><div class="l">Paid this month</div></div>' +
+    '<div class="chip"><div class="n">'+invs.length+(state.pro?"":" / "+FREE_LIMIT)+'</div><div class="l">Invoices'+(state.pro?"":" (free)")+'</div></div>';
+
+  if(!invs.length){
+    $("invList").innerHTML = '<div class="empty">No invoices yet.<br>Tap <b>+ New invoice</b> to make your first one — it takes about a minute.</div>';
+    return;
+  }
+  $("invList").innerHTML = invs.map(inv=>{
+    const t = invTotals(inv), st = effStatus(inv);
+    return '<div class="inv-row">' +
+      '<div class="who"><b>'+esc(inv.customer||"(no customer)")+'</b><span>#'+esc(inv.number)+' · due '+fmtDate(inv.due)+'</span></div>' +
+      '<span class="pill '+st+'">'+st.toUpperCase()+'</span>' +
+      '<div class="money">'+money(t.due>0 && st!=="paid" ? t.due : t.total)+'</div>' +
+      '<div class="flexrow">' +
+        '<button class="small" data-act="open" data-id="'+inv.id+'">Open</button>' +
+        (st!=="paid" ? '<button class="small" data-act="paid" data-id="'+inv.id+'">Mark paid</button>' : '') +
+        '<button class="small ghost" data-act="dup" data-id="'+inv.id+'">Duplicate</button>' +
+      '</div></div>';
+  }).join("");
+}
+$("invList").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-act]"); if(!b) return;
+  const inv = state.invoices.find(i=>i.id===b.dataset.id); if(!inv) return;
+  if(b.dataset.act==="open") openEditor(inv);
+  if(b.dataset.act==="paid"){ inv.status="paid"; inv.paid = invTotals(inv).total; save(); renderList(); toast("Marked paid. Nice!"); }
+  if(b.dataset.act==="dup"){
+    if(!state.pro && state.invoices.length >= FREE_LIMIT){ openUnlock(); toast("Free includes 5 invoices — Pro is unlimited."); return; }
+    const copy = JSON.parse(JSON.stringify(inv));
+    copy.id = "inv"+Date.now(); copy.number = String(state.seq++); copy.status="draft"; copy.paid=0;
+    copy.issue = todayISO(); copy.due = addDays(copy.issue, state.business.terms||30);
+    state.invoices.push(copy); save(); openEditor(copy); toast("Duplicated as #"+copy.number);
+  }
+});
+$("newInvBtn").addEventListener("click", ()=> startNew());
+
+/* ---------- Editor ---------- */
+function startNew(){
+  if(!state.pro && state.invoices.length >= FREE_LIMIT){ openUnlock(); toast("Free includes 5 invoices — Pro is unlimited."); return; }
+  editingId = null;
+  $("editTitle").textContent = "New invoice";
+  $("f_cust").value=""; $("f_custEmail").value=""; $("f_custAddr").value="";
+  $("f_num").value = String(state.seq);
+  $("f_issue").value = todayISO();
+  $("f_due").value = addDays(todayISO(), state.business.terms||30);
+  $("f_tax").value = state.business.tax||0;
+  $("f_disc").value=0; $("f_ship").value=0; $("f_paid").value=0;
+  $("f_status").value="draft"; $("f_notes").value="";
+  $("itemsBody").innerHTML=""; addItemRow({desc:"",qty:1,rate:""});
+  $("deleteInvBtn").hidden = true;
+  updateTotals(); showTab("edit");
+}
+function openEditor(inv){
+  editingId = inv.id;
+  $("editTitle").textContent = "Invoice #"+inv.number;
+  $("f_cust").value = inv.customer||""; $("f_custEmail").value = inv.custEmail||""; $("f_custAddr").value = inv.custAddr||"";
+  $("f_num").value = inv.number||""; $("f_issue").value = inv.issue||todayISO(); $("f_due").value = inv.due||"";
+  $("f_tax").value = inv.tax||0; $("f_disc").value = inv.discount||0; $("f_ship").value = inv.ship||0; $("f_paid").value = inv.paid||0;
+  $("f_status").value = inv.status==="paid" ? "paid" : (inv.status||"draft");
+  $("f_notes").value = inv.notes||"";
+  $("itemsBody").innerHTML="";
+  (inv.items&&inv.items.length?inv.items:[{desc:"",qty:1,rate:""}]).forEach(addItemRow);
+  $("deleteInvBtn").hidden = false;
+  updateTotals(); showTab("edit");
+}
+function addItemRow(it){
+  const tr = document.createElement("tr");
+  tr.innerHTML =
+    '<td><input type="text" class="it-desc" placeholder="What did you sell / do?" value="'+esc(it.desc||"")+'"></td>' +
+    '<td><input type="number" class="it-qty" step="0.01" min="0" value="'+esc(it.qty==null?1:it.qty)+'"></td>' +
+    '<td><input type="number" class="it-rate" step="0.01" min="0" placeholder="0.00" value="'+esc(it.rate==null?"":it.rate)+'"></td>' +
+    '<td class="amt it-amt">$0.00</td>' +
+    '<td><button type="button" class="small ghost danger it-del" title="Remove">✕</button></td>';
+  tr.querySelector(".it-del").addEventListener("click", ()=>{ tr.remove(); updateTotals(); });
+  tr.querySelectorAll("input").forEach(inp=> inp.addEventListener("input", updateTotals));
+  $("itemsBody").appendChild(tr);
+}
+$("addItemBtn").addEventListener("click", ()=>{ addItemRow({desc:"",qty:1,rate:""}); updateTotals(); });
+$("termsBtns").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-days]"); if(!b) return;
+  $("f_due").value = addDays($("f_issue").value || todayISO(), b.dataset.days);
+});
+["f_tax","f_disc","f_ship","f_paid"].forEach(id=> $(id).addEventListener("input", updateTotals));
+
+function readItems(){
+  return [...$("itemsBody").querySelectorAll("tr")].map(tr=>({
+    desc: tr.querySelector(".it-desc").value,
+    qty: num(tr.querySelector(".it-qty").value),
+    rate: num(tr.querySelector(".it-rate").value)
+  }));
+}
+function readEditor(){
+  return {
+    customer: $("f_cust").value.trim(),
+    custEmail: $("f_custEmail").value.trim(),
+    custAddr: $("f_custAddr").value.trim(),
+    number: $("f_num").value.trim(),
+    issue: $("f_issue").value,
+    due: $("f_due").value,
+    items: readItems(),
+    tax: num($("f_tax").value), discount: num($("f_disc").value), ship: num($("f_ship").value),
+    paid: num($("f_paid").value), status: $("f_status").value, notes: $("f_notes").value
+  };
+}
+function updateTotals(){
+  [...$("itemsBody").querySelectorAll("tr")].forEach(tr=>{
+    const q = num(tr.querySelector(".it-qty").value), r = num(tr.querySelector(".it-rate").value);
+    tr.querySelector(".it-amt").textContent = money(q*r);
+  });
+  const t = invTotals(readEditor());
+  $("totalsBox").innerHTML =
+    '<div class="row"><span>Subtotal</span><span>'+money(t.sub)+'</span></div>' +
+    (num($("f_disc").value)? '<div class="row"><span>Discount</span><span>−'+money($("f_disc").value)+'</span></div>' : '') +
+    (t.taxAmt? '<div class="row"><span>Tax ('+esc($("f_tax").value)+'%)</span><span>'+money(t.taxAmt)+'</span></div>' : '') +
+    (num($("f_ship").value)? '<div class="row"><span>Shipping</span><span>'+money($("f_ship").value)+'</span></div>' : '') +
+    '<div class="row grand"><span>Total</span><span>'+money(t.total)+'</span></div>' +
+    (num($("f_paid").value)? '<div class="row"><span>Paid</span><span>−'+money($("f_paid").value)+'</span></div><div class="row due"><span>Balance due</span><span>'+money(t.due)+'</span></div>' : '');
+}
+$("saveInvBtn").addEventListener("click", ()=>{
+  const data = readEditor();
+  if(!data.customer){ toast("Add a customer name first."); $("f_cust").focus(); return; }
+  if(editingId){
+    const inv = state.invoices.find(i=>i.id===editingId);
+    Object.assign(inv, data);
+  } else {
+    data.id = "inv"+Date.now();
+    state.invoices.push(data);
+    if(Number(data.number) >= state.seq) state.seq = Number(data.number)+1;
+    editingId = data.id;
+    $("editTitle").textContent = "Invoice #"+data.number;
+    $("deleteInvBtn").hidden = false;
+  }
+  save(); toast("Saved ✓"); renderList();
+});
+$("cancelEditBtn").addEventListener("click", ()=> showTab("list"));
+$("deleteInvBtn").addEventListener("click", ()=>{
+  if(!editingId) return;
+  if(!confirm("Delete this invoice? This can't be undone.")) return;
+  state.invoices = state.invoices.filter(i=>i.id!==editingId);
+  editingId = null; save(); showTab("list"); toast("Deleted.");
+});
+
+/* ---------- Print ---------- */
+$("printBtn").addEventListener("click", ()=>{
+  const inv = readEditor(); const b = state.business; const t = invTotals(inv);
+  const rows = inv.items.filter(it=> it.desc || it.rate).map(it=>
+    '<tr><td>'+esc(it.desc)+'</td><td>'+esc(it.qty)+'</td><td>'+money(it.rate)+'</td><td style="text-align:right">'+money(num(it.qty)*num(it.rate))+'</td></tr>').join("");
+  $("printArea").innerHTML =
+    '<div class="p-head"><div>' +
+      (state.pro && b.logo ? '<img class="p-logo" src="'+b.logo+'" alt="">' : '<h1>'+esc(b.name||"Invoice")+'</h1>') +
+      '<div class="small">'+esc(b.addr)+'<br>'+esc(b.email)+(b.phone?' · '+esc(b.phone):'')+(b.web?'<br>'+esc(b.web):'')+'</div></div>' +
+      '<div style="text-align:right"><h1>INVOICE</h1><div class="small">#'+esc(inv.number)+'<br>Issued: '+fmtDate(inv.issue)+'<br>Due: '+fmtDate(inv.due)+'</div></div></div>' +
+    '<div class="p-meta"><div><b>Bill to</b><br>'+esc(inv.customer)+'<br><span class="small">'+esc(inv.custAddr)+'<br>'+esc(inv.custEmail)+'</span></div></div>' +
+    '<table><thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>'+rows+'</tbody></table>' +
+    '<div class="p-totals">' +
+      '<div class="row"><span>Subtotal</span><span>'+money(t.sub)+'</span></div>' +
+      (inv.discount? '<div class="row"><span>Discount</span><span>−'+money(inv.discount)+'</span></div>':'') +
+      (t.taxAmt? '<div class="row"><span>Tax ('+esc(inv.tax)+'%)</span><span>'+money(t.taxAmt)+'</span></div>':'') +
+      (inv.ship? '<div class="row"><span>Shipping</span><span>'+money(inv.ship)+'</span></div>':'') +
+      '<div class="row grand"><span>Total</span><span>'+money(t.total)+'</span></div>' +
+      (inv.paid? '<div class="row"><span>Paid</span><span>−'+money(inv.paid)+'</span></div><div class="row grand"><span>Balance due</span><span>'+money(t.due)+'</span></div>':'') +
+    '</div>' +
+    (b.pay? '<p><b>How to pay:</b> '+esc(b.pay)+'</p>':'') +
+    (inv.notes? '<p class="small">'+esc(inv.notes)+'</p>':'') +
+    '<p class="small" style="margin-top:24px">Thank you for your business!</p>';
+  window.print();
+});
+
+/* ---------- Business ---------- */
+function loadBiz(){
+  const b = state.business;
+  $("b_name").value=b.name||""; $("b_email").value=b.email||""; $("b_phone").value=b.phone||"";
+  $("b_web").value=b.web||""; $("b_addr").value=b.addr||""; $("b_pay").value=b.pay||"";
+  $("b_tax").value=b.tax||0; $("b_terms").value=String(b.terms==null?30:b.terms);
+  $("b_color").value=b.color||"#5b3df0";
+  if(b.logo){ $("logoPreview").src=b.logo; $("logoPreview").hidden=false; $("logoRemove").hidden=false; }
+}
+$("saveBizBtn").addEventListener("click", ()=>{
+  const b = state.business;
+  b.name=$("b_name").value.trim(); b.email=$("b_email").value.trim(); b.phone=$("b_phone").value.trim();
+  b.web=$("b_web").value.trim(); b.addr=$("b_addr").value.trim(); b.pay=$("b_pay").value.trim();
+  b.tax=num($("b_tax").value); b.terms=Number($("b_terms").value);
+  if(state.pro) b.color=$("b_color").value;
+  save(); renderPro(); toast("Business info saved ✓");
+});
+$("b_logo").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  if(!state.pro){ openUnlock(); toast("Logos are a Pro feature."); e.target.value=""; return; }
+  const r = new FileReader();
+  r.onload = ()=>{ state.business.logo = r.result; save(); loadBiz(); toast("Logo saved ✓"); };
+  r.readAsDataURL(f);
+});
+$("logoRemove").addEventListener("click", ()=>{ state.business.logo=""; save(); $("logoPreview").hidden=true; $("logoRemove").hidden=true; $("b_logo").value=""; });
+$("b_color").addEventListener("input", e=>{ if(state.pro){ document.documentElement.style.setProperty("--accent", e.target.value); } });
+
+/* ---------- Reminders ---------- */
+function renderReminders(){
+  renderPro();
+  if(!state.pro) return;
+  const unpaid = state.invoices.filter(inv=> effStatus(inv)!=="paid" && invTotals(inv).due>0)
+    .sort((a,b)=> (a.due||"").localeCompare(b.due||""));
+  const pick = $("r_pick");
+  if(!unpaid.length){
+    pick.innerHTML = "";
+    $("r_out").innerHTML = '<div class="empty">No unpaid invoices. Everybody\'s paid up — nice work! 🎉</div>';
+    return;
+  }
+  pick.innerHTML = unpaid.map(inv=>'<option value="'+inv.id+'">#'+esc(inv.number)+' — '+esc(inv.customer)+' — '+money(invTotals(inv).due)+' due '+fmtDate(inv.due)+'</option>').join("");
+  renderReminderTexts();
+}
+$("r_pick").addEventListener("change", renderReminderTexts);
+function renderReminderTexts(){
+  const inv = state.invoices.find(i=>i.id===$("r_pick").value); if(!inv) return;
+  const t = invTotals(inv), b = state.business;
+  const name = (inv.customer||"there").split(" ")[0];
+  const biz = b.name || "us";
+  const amt = money(t.due), due = fmtDate(inv.due);
+  const overdueDays = Math.max(0, Math.round((new Date(todayISO()) - new Date(inv.due||todayISO()))/86400000));
+  const texts = [
+    ["Friendly nudge", "Hi "+name+", just a friendly reminder that invoice #"+inv.number+" for "+amt+" is due "+due+". You can pay by: "+(b.pay||"the method on the invoice")+". Thank you! — "+biz],
+    ["Firm reminder", "Hi "+name+", invoice #"+inv.number+" for "+amt+" was due "+due+(overdueDays? " ("+overdueDays+" days ago)":"")+" and is still open. Please send payment this week so we can keep your account current. Reply here if anything looks off. — "+biz],
+    ["Final notice", "Hi "+name+", this is a final notice on invoice #"+inv.number+" for "+amt+", due "+due+". Please contact "+biz+" right away to arrange payment so we don't have to pause work on your account. Thank you for understanding."]
+  ];
+  $("r_out").innerHTML = texts.map(([label,txt],i)=>
+    '<h3>'+label+'</h3><div class="reminder-box" id="rem'+i+'">'+esc(txt)+'</div>' +
+    '<button class="small" data-copy="'+i+'">Copy message</button>').join("");
+  $("r_out").querySelectorAll("button[data-copy]").forEach(btn=> btn.addEventListener("click", ()=>{
+    const txt = $("rem"+btn.dataset.copy).textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=> toast("Copied — paste it into a text or email ✓")).catch(()=> toast("Copy blocked — long-press the text to copy."));
+    } else toast("Long-press the text to copy.");
+  }));
+}
+
+/* ---------- Init ---------- */
+loadBiz(); renderPro(); renderList();
+</script>
+</body>
+</html>
